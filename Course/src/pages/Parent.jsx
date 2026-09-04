@@ -5,7 +5,7 @@ import { TOTAL_LESSONS } from "../data/curriculum.js";
 import { TOTAL_DAYS } from "../data/weeks.js";
 import { BADGES } from "../data/badges.js";
 import { overallCompletionPct } from "../utils/progress.js";
-import { fetchClassProgress } from "../utils/account.js";
+import { fetchClassProgress, fetchLoginLog } from "../utils/account.js";
 
 const TEACHER_SESSION_KEY = "abk_teacher_pw";
 
@@ -19,20 +19,21 @@ function ClassProgress({ t }) {
   });
   const [unlocked, setUnlocked] = useState(false);
   const [students, setStudents] = useState(null);
+  const [logins, setLogins] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
   const load = async (pw) => {
     setBusy(true);
     setError("");
-    const result = await fetchClassProgress(pw);
+    const [progressResult, loginResult] = await Promise.all([fetchClassProgress(pw), fetchLoginLog(pw)]);
     setBusy(false);
-    if (!result.ok) {
+    if (!progressResult.ok) {
       setUnlocked(false);
       setError(
-        result.error === "wrong-teacher-password"
+        progressResult.error === "wrong-teacher-password"
           ? t({ en: "Wrong teacher passcode.", zh: "教师密码错误。" })
-          : result.error === "teacher-not-configured"
+          : progressResult.error === "teacher-not-configured"
           ? t({
               en: "Teacher view isn't set up yet — add a TEACHER_PASSWORD environment variable in Vercel.",
               zh: "教师视图尚未设置——请在Vercel中添加TEACHER_PASSWORD环境变量。",
@@ -42,7 +43,8 @@ function ClassProgress({ t }) {
       return;
     }
     setUnlocked(true);
-    setStudents(result.data.students || []);
+    setStudents(progressResult.data.students || []);
+    setLogins(loginResult.ok ? loginResult.data.logins || [] : []);
     try {
       window.sessionStorage.setItem(TEACHER_SESSION_KEY, pw);
     } catch {
@@ -85,44 +87,85 @@ function ClassProgress({ t }) {
   }
 
   return (
-    <div className="card card-pad parent-block">
-      <h3>{t({ en: `Class Progress (${students.length} students)`, zh: `班级进度（${students.length}名学生）` })}</h3>
-      {students.length === 0 ? (
-        <p>{t({ en: "No students have created an account yet.", zh: "还没有学生创建账户。" })}</p>
-      ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table className="class-progress-table">
-            <thead>
-              <tr>
-                <th>{t({ en: "Name", zh: "姓名" })}</th>
-                <th>{t({ en: "Day", zh: "天数" })}</th>
-                <th>{t({ en: "Lessons", zh: "课程" })}</th>
-                <th>XP</th>
-                <th>{t({ en: "Streak", zh: "连续" })}</th>
-                <th>{t({ en: "Badges", zh: "徽章" })}</th>
-                <th>{t({ en: "Last Active", zh: "最近活跃" })}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((s) => (
-                <tr key={s.displayName}>
-                  <td>{s.displayName}</td>
-                  <td>{s.currentDay}/{TOTAL_DAYS}</td>
-                  <td>{s.completedLessons}/{TOTAL_LESSONS}</td>
-                  <td>{s.xp}</td>
-                  <td>🔥 {s.streak}</td>
-                  <td>{s.badges}/{BADGES.length}</td>
-                  <td>{s.lastActiveDate || "—"}</td>
+    <>
+      <div className="card card-pad parent-block">
+        <h3>{t({ en: `Class Progress (${students.length} students)`, zh: `班级进度（${students.length}名学生）` })}</h3>
+        {students.length === 0 ? (
+          <p>{t({ en: "No students have created an account yet.", zh: "还没有学生创建账户。" })}</p>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table className="class-progress-table">
+              <thead>
+                <tr>
+                  <th>{t({ en: "Name", zh: "姓名" })}</th>
+                  <th>{t({ en: "Day", zh: "天数" })}</th>
+                  <th>{t({ en: "Lessons", zh: "课程" })}</th>
+                  <th>XP</th>
+                  <th>{t({ en: "Streak", zh: "连续" })}</th>
+                  <th>{t({ en: "Badges", zh: "徽章" })}</th>
+                  <th>{t({ en: "Last Active", zh: "最近活跃" })}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-      <button type="button" className="btn btn-ghost btn-sm" style={{ marginTop: 12 }} onClick={() => load(teacherPassword)} disabled={busy}>
+              </thead>
+              <tbody>
+                {students.map((s) => (
+                  <tr key={s.displayName}>
+                    <td>{s.displayName}</td>
+                    <td>{s.currentDay}/{TOTAL_DAYS}</td>
+                    <td>{s.completedLessons}/{TOTAL_LESSONS}</td>
+                    <td>{s.xp}</td>
+                    <td>🔥 {s.streak}</td>
+                    <td>{s.badges}/{BADGES.length}</td>
+                    <td>{s.lastActiveDate || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="card card-pad parent-block">
+        <h3>{t({ en: "Login Log", zh: "登录记录" })}</h3>
+        <p className="settings-note">
+          {t({
+            en: "Every time a student logs in, with when — most recent first.",
+            zh: "每次学生登录的记录，附带时间——最新的排在最前面。",
+          })}
+        </p>
+        {!logins || logins.length === 0 ? (
+          <p>{t({ en: "No logins recorded yet.", zh: "还没有登录记录。" })}</p>
+        ) : (
+          <div style={{ overflowX: "auto", maxHeight: 320, overflowY: "auto" }}>
+            <table className="class-progress-table">
+              <thead>
+                <tr>
+                  <th>{t({ en: "Name", zh: "姓名" })}</th>
+                  <th>{t({ en: "Logged In At", zh: "登录时间" })}</th>
+                  <th>{t({ en: "Type", zh: "类型" })}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logins.map((entry, i) => (
+                  <tr key={i}>
+                    <td>{entry.name}</td>
+                    <td>{new Date(entry.at).toLocaleString()}</td>
+                    <td>
+                      {entry.isNewAccount
+                        ? t({ en: "New account", zh: "新账户" })
+                        : t({ en: "Returning", zh: "返回登录" })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <button type="button" className="btn btn-ghost btn-sm" style={{ marginBottom: 16 }} onClick={() => load(teacherPassword)} disabled={busy}>
         {t({ en: "Refresh", zh: "刷新" })}
       </button>
-    </div>
+    </>
   );
 }
 
