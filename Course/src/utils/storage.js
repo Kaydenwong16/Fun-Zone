@@ -9,6 +9,7 @@ const KEYS = {
   progress: "abk_progress_v1",
   projects: "abk_projects_v1",
   session: "abk_session_v1",
+  deviceKnown: "abk_device_known_v1",
 };
 
 function readJSON(key, fallback) {
@@ -75,6 +76,45 @@ export function resetAll() {
     window.localStorage.removeItem(KEYS.progress);
     window.localStorage.removeItem(KEYS.projects);
     window.localStorage.removeItem(KEYS.session);
+    window.localStorage.removeItem(KEYS.deviceKnown);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Clears one student's local profile/progress/session so a different
+// student can log into this same device — but deliberately leaves
+// `deviceKnown` set, so the next screen is a quick name+password login
+// instead of the full "never used this device before" onboarding wizard.
+export function logoutDevice() {
+  try {
+    window.localStorage.removeItem(KEYS.profile);
+    window.localStorage.removeItem(KEYS.progress);
+    window.localStorage.removeItem(KEYS.projects);
+    window.localStorage.removeItem(KEYS.session);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ---- "has this device seen a student before?" -------------------------
+// Drives which screen shows when profile.onboarded is false: the full
+// onboarding wizard (never used), or a quick login (used before, logged
+// out — most likely a different student wants to switch in).
+
+export function isDeviceKnown() {
+  try {
+    return window.localStorage.getItem(KEYS.deviceKnown) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function markDeviceKnown() {
+  try {
+    window.localStorage.setItem(KEYS.deviceKnown, "1");
     return true;
   } catch {
     return false;

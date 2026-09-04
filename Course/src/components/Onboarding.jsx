@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { useProgress } from "../context/ProgressContext.jsx";
 import { authAccount } from "../utils/account.js";
-import { getProgress, saveSession } from "../utils/storage.js";
+import { getProgress, saveSession, markDeviceKnown } from "../utils/storage.js";
 
 const AVATARS = ["🤖", "🦊", "🐼", "🦄", "🐯", "🐸", "🐙", "🦁"];
 const MIN_PASSWORD_LEN = 4;
@@ -55,6 +55,7 @@ export default function Onboarding({ onFinish }) {
       // Backend unreachable/not configured — don't block play, just keep
       // this device local-only (matches the old, pre-account behavior).
       updateProfile({ name: cleanName, avatar, language: lang, onboarded: true });
+      markDeviceKnown();
       onFinish();
       return;
     }
@@ -68,6 +69,7 @@ export default function Onboarding({ onFinish }) {
       ...(serverProfile || { name: cleanName, avatar, language: lang }),
       onboarded: true,
     });
+    markDeviceKnown();
     onFinish();
   };
 
