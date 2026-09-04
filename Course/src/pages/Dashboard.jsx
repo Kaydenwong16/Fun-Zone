@@ -69,7 +69,7 @@ export default function Dashboard({ onNavigate, onOpenLesson }) {
 
       <div className="dash-grid">
         <div className="card card-pad dash-mission">
-          <h3>🎯 {t({ en: "Today's Mission", zh: "今日任务" })} — {t({ en: `Day ${progress.currentDay}`, zh: `第${progress.currentDay}天` })}</h3>
+          <h3>🎯 {t({ en: "Today's Mission", zh: "今日任务" })} — {t({ en: `Chapter ${progress.currentDay}`, zh: `第${progress.currentDay}章` })}</h3>
           {todayMission ? (
             <>
               <p className="dash-mission-title">{t(todayMission.title)}</p>

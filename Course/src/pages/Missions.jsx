@@ -17,7 +17,7 @@ export default function Missions() {
       <h1 className="page-title">
         <span className="en">Missions</span> <span className="zh">任务</span>
       </h1>
-      <p className="page-subtitle">{t({ en: `Day ${progress.currentDay} of ${TOTAL_DAYS}`, zh: `第${progress.currentDay}天 / 共${TOTAL_DAYS}天` })}</p>
+      <p className="page-subtitle">{t({ en: `Chapter ${progress.currentDay} of ${TOTAL_DAYS}`, zh: `第${progress.currentDay}章 / 共${TOTAL_DAYS}章` })}</p>
 
       <div className="mission-grid">
         {MISSIONS.map((m) => {
@@ -30,7 +30,7 @@ export default function Missions() {
               className={`mission-card card ${done ? "is-done" : ""} ${isToday ? "is-today" : ""} ${locked ? "is-locked" : ""} ${m.isWeekFinal ? "is-final" : ""}`}
             >
               <div className="mission-card-head">
-                <span className="mission-day">{t({ en: `Day ${m.day}`, zh: `第${m.day}天` })}</span>
+                <span className="mission-day">{t({ en: `Chapter ${m.day}`, zh: `第${m.day}章` })}</span>
                 {done && <span className="mission-check">✓</span>}
                 {locked && <span className="mission-lock">🔒</span>}
               </div>

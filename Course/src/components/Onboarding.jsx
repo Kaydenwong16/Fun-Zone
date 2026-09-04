@@ -166,7 +166,7 @@ export default function Onboarding({ onFinish }) {
             <button type="button" className="btn btn-primary" disabled={busy} onClick={finish}>
               {busy
                 ? t({ en: "Checking…", zh: "登录中…" })
-                : `${t({ en: "Start Day 1", zh: "开始第1天" })} →`}
+                : `${t({ en: "Start Chapter 1", zh: "开始第1章" })} →`}
             </button>
           </>
         )}
