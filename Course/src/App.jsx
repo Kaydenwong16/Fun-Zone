@@ -5,6 +5,7 @@ import Header from "./components/Header.jsx";
 import SettingsPanel from "./components/SettingsPanel.jsx";
 import Onboarding from "./components/Onboarding.jsx";
 import Login from "./components/Login.jsx";
+import BackgroundDecor from "./components/BackgroundDecor.jsx";
 import XPToast from "./components/XPToast.jsx";
 import BadgeUnlockModal from "./components/BadgeUnlockModal.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
@@ -27,6 +28,8 @@ function Shell() {
   const [showAsNewStudent, setShowAsNewStudent] = useState(false);
 
   if (!profile.onboarded) {
+    // No <BackgroundDecor/> here: Onboarding/Login paint their own opaque
+    // full-viewport background, so it would never be visible underneath.
     if (isDeviceKnown() && !showAsNewStudent) {
       return <Login onFinish={() => setRoute("home")} onNewStudent={() => setShowAsNewStudent(true)} />;
     }
@@ -44,25 +47,28 @@ function Shell() {
   };
 
   return (
-    <div className="app-shell">
-      <Header route={route} onNavigate={navigate} onOpenSettings={() => setSettingsOpen(true)} />
-      <main className="app-main container">
-        {route === "home" && <Dashboard onNavigate={navigate} onOpenLesson={openLesson} />}
-        {route === "learn" && (
-          <Learn openLessonId={openLessonId} onOpenLesson={setOpenLessonId} onCloseLesson={() => setOpenLessonId(null)} />
-        )}
-        {route === "missions" && <Missions />}
-        {route === "lab" && <Lab />}
-        {route === "roadmap" && <Roadmap onOpenLesson={openLesson} />}
-        {route === "badges" && <Badges />}
-        {route === "teacher" && <AITeacher />}
-        {route === "parent" && <Parent />}
-      </main>
+    <>
+      <BackgroundDecor />
+      <div className="app-shell">
+        <Header route={route} onNavigate={navigate} onOpenSettings={() => setSettingsOpen(true)} />
+        <main className="app-main container">
+          {route === "home" && <Dashboard onNavigate={navigate} onOpenLesson={openLesson} />}
+          {route === "learn" && (
+            <Learn openLessonId={openLessonId} onOpenLesson={setOpenLessonId} onCloseLesson={() => setOpenLessonId(null)} />
+          )}
+          {route === "missions" && <Missions />}
+          {route === "lab" && <Lab />}
+          {route === "roadmap" && <Roadmap onOpenLesson={openLesson} />}
+          {route === "badges" && <Badges />}
+          {route === "teacher" && <AITeacher />}
+          {route === "parent" && <Parent />}
+        </main>
 
-      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
-      <XPToast />
-      <BadgeUnlockModal />
-    </div>
+        {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
+        <XPToast />
+        <BadgeUnlockModal />
+      </div>
+    </>
   );
 }
 
