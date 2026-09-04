@@ -139,8 +139,10 @@ export default function Header({ route, onNavigate, onOpenSettings }) {
             🔥 {progress.streak}
           </div>
           <button type="button" className="btn btn-ghost btn-sm header-avatar" onClick={onOpenSettings} aria-label="Settings">
-            {profile.language !== "zh" && <span className="en">Log out</span>}
-            {profile.language !== "en" && <span className="zh">退出登录</span>}
+            <span className="main-nav-label">
+              {profile.language !== "zh" && <span className="en">Log out</span>}
+              {profile.language !== "en" && <span className="zh">退出登录</span>}
+            </span>
           </button>
           {isCompact && (
             <button
