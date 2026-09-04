@@ -1,6 +1,6 @@
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { useProgress } from "../context/ProgressContext.jsx";
-import { LEVELS, WEEKS, dayRangeForWeek } from "../data/weeks.js";
+import { LEVELS, WEEKS } from "../data/weeks.js";
 import { LESSONS_BY_WEEK } from "../data/curriculum.js";
 
 export default function Roadmap({ onOpenLesson }) {
@@ -10,7 +10,7 @@ export default function Roadmap({ onOpenLesson }) {
   return (
     <div className="page roadmap-page animate-in">
       <h1 className="page-title">
-        <span className="en">90-Day Roadmap</span> <span className="zh">90天学习路线</span>
+        <span className="en">12-Week Roadmap</span> <span className="zh">12周学习路线</span>
       </h1>
 
       {LEVELS.map((level) => (
@@ -23,15 +23,12 @@ export default function Roadmap({ onOpenLesson }) {
             {level.weeks.map((weekNum) => {
               const week = WEEKS.find((w) => w.number === weekNum);
               const lessons = LESSONS_BY_WEEK[weekNum];
-              const range = dayRangeForWeek(weekNum);
               const doneCount = lessons.filter((l) => progress.completedLessons.includes(l.id)).length;
               const allDone = doneCount === lessons.length;
               const started = doneCount > 0;
               return (
                 <div key={weekNum} className={`roadmap-week-card card ${allDone ? "is-done" : started ? "is-active" : ""}`}>
-                  <div className="roadmap-week-days">
-                    {t({ en: `Day ${range.start}`, zh: `第${range.start}天` })} – {t({ en: `Day ${range.end}`, zh: `第${range.end}天` })}
-                  </div>
+                  <div className="roadmap-week-days">{t({ en: `Day ${weekNum}`, zh: `第${weekNum}天` })}</div>
                   <h3>{t({ en: `Week ${weekNum}`, zh: `第${weekNum}周` })}</h3>
                   <p className="roadmap-week-title">{t(week.title)}</p>
                   <div className="roadmap-week-lessons">

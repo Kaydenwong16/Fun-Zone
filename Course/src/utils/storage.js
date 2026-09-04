@@ -55,7 +55,7 @@ export const DEFAULT_PROGRESS = {
   streak: 0,
   lastActiveDate: null, // ISO date string, for streak calc
   completedLessons: [], // lesson ids
-  completedMissions: [], // day numbers (1-90)
+  completedMissions: [], // day numbers (1-12; one per week)
   quizResults: {}, // { [lessonId]: { score, total, at } }
   badges: [], // badge ids
   currentDay: 1,

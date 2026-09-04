@@ -21,7 +21,7 @@ export const BADGES = [
     name: { en: "Prompt Master", zh: "提示词高手" },
     icon: "🎯",
     description: { en: "You improved a prompt and got a better answer.", zh: "你改进了提示词，得到了更好的答案。" },
-    condition: (p) => p.completedMissions.includes(7),
+    condition: (p) => p.completedMissions.includes(1),
   },
   {
     id: "code-starter",
@@ -35,7 +35,7 @@ export const BADGES = [
     name: { en: "Web Builder", zh: "网页建造者" },
     icon: "🌐",
     description: { en: "You built your first interactive website.", zh: "你建造了第一个互动网站。" },
-    condition: (p) => p.completedMissions.includes(14),
+    condition: (p) => p.completedMissions.includes(2),
   },
   {
     id: "bug-hunter",
@@ -56,21 +56,21 @@ export const BADGES = [
     name: { en: "AI Builder", zh: "AI应用建造者" },
     icon: "🤖",
     description: { en: "You built your own AI-powered app.", zh: "你做出了自己的AI应用。" },
-    condition: (p) => p.completedMissions.includes(70),
+    condition: (p) => p.completedMissions.includes(10),
   },
   {
     id: "debug-master",
     name: { en: "Debug Master", zh: "调试大师" },
     icon: "🛠️",
     description: { en: "You debugged like a real builder — calmly and step by step.", zh: "你像真正的建造者一样冷静地一步步调试。" },
-    condition: (p) => p.completedMissions.includes(77),
+    condition: (p) => p.completedMissions.includes(11),
   },
   {
     id: "final-builder",
     name: { en: "Final Builder", zh: "终极建造者" },
     icon: "🏆",
-    description: { en: "You completed the 90-day AI Builder program!", zh: "你完成了90天AI建造者计划！" },
-    condition: (p) => p.completedMissions.includes(90),
+    description: { en: "You completed the 12-week AI Builder program!", zh: "你完成了12周AI建造者计划！" },
+    condition: (p) => p.completedMissions.includes(12),
   },
 ];
 

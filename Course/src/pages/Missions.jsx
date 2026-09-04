@@ -1,22 +1,11 @@
-import { useMemo } from "react";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { useProgress } from "../context/ProgressContext.jsx";
 import { MISSIONS } from "../data/missions.js";
-import { weekForDay, TOTAL_DAYS } from "../data/weeks.js";
+import { TOTAL_DAYS } from "../data/weeks.js";
 
 export default function Missions() {
   const { t } = useLanguage();
   const { progress, completeMission, advanceDay } = useProgress();
-
-  const grouped = useMemo(() => {
-    const byWeek = {};
-    for (const m of MISSIONS) {
-      const w = weekForDay(m.day);
-      byWeek[w] = byWeek[w] || [];
-      byWeek[w].push(m);
-    }
-    return byWeek;
-  }, []);
 
   const doMission = (mission) => {
     completeMission(mission.day, mission.xp);
@@ -30,40 +19,35 @@ export default function Missions() {
       </h1>
       <p className="page-subtitle">{t({ en: `Day ${progress.currentDay} of ${TOTAL_DAYS}`, zh: `第${progress.currentDay}天 / 共${TOTAL_DAYS}天` })}</p>
 
-      {Object.entries(grouped).map(([week, missions]) => (
-        <div key={week} className="mission-week-block">
-          <h2 className="mission-week-title">{t({ en: `Week ${week}`, zh: `第${week}周` })}</h2>
-          <div className="mission-grid">
-            {missions.map((m) => {
-              const done = progress.completedMissions.includes(m.day);
-              const isToday = m.day === progress.currentDay;
-              const locked = m.day > progress.currentDay && !done;
-              return (
-                <div
-                  key={m.day}
-                  className={`mission-card card ${done ? "is-done" : ""} ${isToday ? "is-today" : ""} ${locked ? "is-locked" : ""} ${m.isWeekFinal ? "is-final" : ""}`}
-                >
-                  <div className="mission-card-head">
-                    <span className="mission-day">{t({ en: `Day ${m.day}`, zh: `第${m.day}天` })}</span>
-                    {done && <span className="mission-check">✓</span>}
-                    {locked && <span className="mission-lock">🔒</span>}
-                  </div>
-                  <p className="mission-title">{t(m.title)}</p>
-                  <p className="mission-desc">{t(m.description)}</p>
-                  <div className="mission-card-foot">
-                    <span className="pill pill-amber">+{m.xp} XP</span>
-                    {!done && !locked && (
-                      <button type="button" className="btn btn-primary btn-sm" onClick={() => doMission(m)}>
-                        {t({ en: "Mark Complete", zh: "标记完成" })}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ))}
+      <div className="mission-grid">
+        {MISSIONS.map((m) => {
+          const done = progress.completedMissions.includes(m.day);
+          const isToday = m.day === progress.currentDay;
+          const locked = m.day > progress.currentDay && !done;
+          return (
+            <div
+              key={m.day}
+              className={`mission-card card ${done ? "is-done" : ""} ${isToday ? "is-today" : ""} ${locked ? "is-locked" : ""} ${m.isWeekFinal ? "is-final" : ""}`}
+            >
+              <div className="mission-card-head">
+                <span className="mission-day">{t({ en: `Day ${m.day}`, zh: `第${m.day}天` })}</span>
+                {done && <span className="mission-check">✓</span>}
+                {locked && <span className="mission-lock">🔒</span>}
+              </div>
+              <p className="mission-title">{t(m.title)}</p>
+              <p className="mission-desc">{t(m.description)}</p>
+              <div className="mission-card-foot">
+                <span className="pill pill-amber">+{m.xp} XP</span>
+                {!done && !locked && (
+                  <button type="button" className="btn btn-primary btn-sm" onClick={() => doMission(m)}>
+                    {t({ en: "Mark Complete", zh: "标记完成" })}
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
