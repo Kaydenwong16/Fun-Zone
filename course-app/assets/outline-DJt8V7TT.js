@@ -1,7 +1,7 @@
-import{i as e,l as t,n,r,t as i,u as a}from"./missions-zEhwaJwB.js";function o(e){return e?`<span class="en">${e.en}</span><span class="zh">${e.zh}</span>`:``}function s(e){let t=a.find(t=>t.number===e),i=r[e]||[],s=n(e);return`
+import{i as e,l as t,n,r,t as i,u as a}from"./missions-zEhwaJwB.js";function o(e){return e?`<span class="en">${e.en}</span><span class="zh">${e.zh}</span>`:``}function s(e){if(e===12)return{start:78,end:90};let t=(e-1)*7+1;return{start:t,end:t+6}}function c(e){let t=a.find(t=>t.number===e),i=r[e]||[],c=n(e),{start:l,end:u}=s(e);return`
     <div class="outline-week card card-pad">
       <div class="outline-week-head">
-        <span class="pill pill-blue">${o({en:`Week ${e} · Day ${e}`,zh:`第${e}周 · 第${e}天`})}</span>
+        <span class="pill pill-blue">${o({en:`Week ${e} · Days ${l}–${u}`,zh:`第${e}周 · 第${l}–${u}天`})}</span>
         <h3>${o(t.title)}</h3>
       </div>
 
@@ -14,22 +14,22 @@ import{i as e,l as t,n,r,t as i,u as a}from"./missions-zEhwaJwB.js";function o(e
           </li>`).join(``)}
       </ol>
 
-      ${s?`
+      ${c?`
       <h4 class="outline-subhead">${o({en:`Mission`,zh:`任务`})}</h4>
       <div class="outline-mission">
-        <p class="outline-mission-title">${o(s.title)} <span class="pill pill-amber">+${s.xp} XP</span></p>
-        <p class="outline-mission-desc">${o(s.description)}</p>
+        <p class="outline-mission-title">${o(c.title)} <span class="pill pill-amber">+${c.xp} XP</span></p>
+        <p class="outline-mission-desc">${o(c.description)}</p>
       </div>`:``}
-    </div>`}function c(e){return`
+    </div>`}function l(e){return`
     <section class="outline-level">
       <div class="roadmap-level-head">
         <span class="pill pill-purple">${o({en:`LEVEL ${e.number}`,zh:`等级 ${e.number}`})}</span>
         <h2>${o(e.name)}</h2>
       </div>
       <div class="outline-weeks">
-        ${e.weeks.map(s).join(``)}
+        ${e.weeks.map(c).join(``)}
       </div>
-    </section>`}function l(){let n=document.getElementById(`outline-root`);n.innerHTML=`
+    </section>`}function u(){let n=document.getElementById(`outline-root`);n.innerHTML=`
     <div class="outline-page">
       <header class="outline-header">
         <div class="outline-header-inner container">
@@ -48,13 +48,13 @@ import{i as e,l as t,n,r,t as i,u as a}from"./missions-zEhwaJwB.js";function o(e
           <span class="en">Course Outline</span> <span class="zh">课程大纲</span>
         </h1>
         <p class="page-subtitle">
-          ${o({en:`12 weeks, one lesson day each · ${e} lessons · ${i.length} missions`,zh:`共12周，每周一个学习日 · ${e}节课 · ${i.length}个任务`})}
+          ${o({en:`A 90-day journey, 12 weeks of 7 days each · ${e} lessons · ${i.length} missions`,zh:`90天的学习旅程，共12周，每周7天 · ${e}节课 · ${i.length}个任务`})}
         </p>
 
-        ${t.map(c).join(``)}
+        ${t.map(l).join(``)}
 
         <p class="outline-footer-note">
           ${o({en:`This is a read-only overview for parents — no login needed. Your child's own progress lives in the app.`,zh:`这是给家长查看的只读概览——无需登录。孩子的实际进度保存在应用内。`})}
         </p>
       </main>
-    </div>`}l();
+    </div>`}u();

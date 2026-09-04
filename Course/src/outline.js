@@ -14,15 +14,27 @@ function bi(field) {
   return `<span class="en">${field.en}</span><span class="zh">${field.zh}</span>`;
 }
 
+// Purely a display label on this page: a week of curriculum content is
+// paced as 7 calendar days (Week 1 = Days 1–7, ... Week 12 = Days 78–90,
+// its Final Project week running long). This is independent of how the
+// app itself tracks progress (one active lesson-day per week) — it's
+// just how the outline presents the pacing to a parent.
+function calendarDayRange(weekNumber) {
+  if (weekNumber === 12) return { start: 78, end: 90 };
+  const start = (weekNumber - 1) * 7 + 1;
+  return { start, end: start + 6 };
+}
+
 function weekBlock(weekNumber) {
   const week = WEEKS.find((w) => w.number === weekNumber);
   const lessons = LESSONS_BY_WEEK[weekNumber] || [];
   const mission = missionForDay(weekNumber);
+  const { start, end } = calendarDayRange(weekNumber);
 
   return `
     <div class="outline-week card card-pad">
       <div class="outline-week-head">
-        <span class="pill pill-blue">${bi({ en: `Week ${weekNumber} · Day ${weekNumber}`, zh: `第${weekNumber}周 · 第${weekNumber}天` })}</span>
+        <span class="pill pill-blue">${bi({ en: `Week ${weekNumber} · Days ${start}–${end}`, zh: `第${weekNumber}周 · 第${start}–${end}天` })}</span>
         <h3>${bi(week.title)}</h3>
       </div>
 
@@ -87,8 +99,8 @@ function render() {
         </h1>
         <p class="page-subtitle">
           ${bi({
-            en: `12 weeks, one lesson day each · ${TOTAL_LESSONS} lessons · ${MISSIONS.length} missions`,
-            zh: `共12周，每周一个学习日 · ${TOTAL_LESSONS}节课 · ${MISSIONS.length}个任务`,
+            en: `A 90-day journey, 12 weeks of 7 days each · ${TOTAL_LESSONS} lessons · ${MISSIONS.length} missions`,
+            zh: `90天的学习旅程，共12周，每周7天 · ${TOTAL_LESSONS}节课 · ${MISSIONS.length}个任务`,
           })}
         </p>
 
