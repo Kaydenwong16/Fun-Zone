@@ -1,4 +1,4 @@
-# Fighter-Jet
+# Fun-Zone
 
 Kayden's Fun Zone — a kids' landing page (`Website/index.html`, served at `/`) with a rotating
 hero video, linking to two things: Kayden's Jet Battle, a browser-based fighter jet shooter game
@@ -8,6 +8,10 @@ hero video, linking to two things: Kayden's Jet Battle, a browser-based fighter 
 
 The root `vercel.json` rewrites `/` to `Website/index.html`; `/game/` and `/course-app/` are
 served automatically as static folders.
+
+Live at **https://fun-zone-theta.vercel.app**. This repo (`Kaydenwong16/Fun-Zone`) is the
+primary one — it started as a copy of the original `Kaydenwong16/Fighter-Jet` repo (same
+history, same code), which still exists but is no longer the one being deployed to.
 
 ## Play
 
@@ -19,6 +23,10 @@ Open `Website/index.html` for the landing page, or `game/index.html` to jump str
 - **Space** — shoot
 
 ## Global leaderboard setup
+
+> **Status on the live Fun-Zone deployment:** not done yet — Vercel env vars don't carry over
+> when a repo is freshly imported into a new project, so this still needs doing here even
+> though it was already set up on the old Fighter-Jet project.
 
 Players enter their name before playing, get 3 minutes on the clock, and the top 3 scores
 are shown to every visitor via `/api/leaderboard` (`api/leaderboard.js`), backed by Upstash
@@ -33,6 +41,8 @@ Until this is done, `/api/leaderboard` returns an error and the game quietly fal
 showing "No scores yet" instead of breaking.
 
 ## Course student accounts & teacher view setup
+
+> **Status on the live Fun-Zone deployment:** also not done yet, same reason as above.
 
 AI Builder Kids (`/course-app/`) uses the *same* Upstash Redis database above (via
 `api/course-account.js`) to give each student their own name+password account, synced across
