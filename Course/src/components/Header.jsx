@@ -93,6 +93,7 @@ export default function Header({ route, onNavigate, onOpenSettings }) {
           <span className="brand-text">
             {profile.language !== "zh" && <span className="en">AI Builder Kids</span>}
             {profile.language !== "en" && <span className="zh">儿童AI课程</span>}
+            <span className="credit">（Claude）</span>
           </span>
         </button>
 

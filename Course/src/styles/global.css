@@ -552,6 +552,13 @@ code {
   color: var(--ink-soft);
 }
 
+.brand-text .credit {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  opacity: 0.75;
+}
+
 .main-nav {
   display: flex;
   gap: 2px;
