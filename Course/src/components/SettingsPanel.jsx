@@ -17,14 +17,17 @@ export default function SettingsPanel({ onClose }) {
   const { t, language, setLanguage, profile, updateProfile } = useLanguage();
   const { progress, reset } = useProgress();
   const [confirmReset, setConfirmReset] = useState(false);
+  const [resetBusy, setResetBusy] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const [session, setSession] = useState(() => getSession());
   const [linkPassword, setLinkPassword] = useState("");
   const [linkBusy, setLinkBusy] = useState(false);
   const [linkError, setLinkError] = useState("");
 
-  const doReset = () => {
-    reset();
+  const doReset = async () => {
+    setResetBusy(true);
+    await reset(); // also clears the cloud copy, if this profile is linked
+    setResetBusy(false);
     setConfirmReset(false);
     onClose?.();
     window.location.reload();
@@ -205,10 +208,12 @@ export default function SettingsPanel({ onClose }) {
           ) : (
             <div className="reset-confirm">
               <p>{t({ en: "This will erase all progress, XP, and badges. Are you sure?", zh: "这将清除所有进度、经验值和徽章。你确定吗？" })}</p>
-              <button type="button" className="btn btn-danger btn-sm" onClick={doReset}>
-                {t({ en: "Yes, reset everything", zh: "是的，全部重置" })}
+              <button type="button" className="btn btn-danger btn-sm" disabled={resetBusy} onClick={doReset}>
+                {resetBusy
+                  ? t({ en: "Resetting…", zh: "重置中…" })
+                  : t({ en: "Yes, reset everything", zh: "是的，全部重置" })}
               </button>
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setConfirmReset(false)}>
+              <button type="button" className="btn btn-ghost btn-sm" disabled={resetBusy} onClick={() => setConfirmReset(false)}>
                 {t({ en: "Cancel", zh: "取消" })}
               </button>
             </div>
