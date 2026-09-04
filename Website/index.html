@@ -172,6 +172,45 @@
     opacity: 0.5;
     pointer-events: none;
   }
+  /* ---- ambient decor behind the two adventure buttons: dinosaurs
+     running across + color bubbles floating up. Purely cosmetic. ---- */
+  #ctaDecor {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  #ctaDecor .dino {
+    position: absolute;
+    left: -15vw;
+    opacity: 0.4;
+    animation-name: ctaDinoRun;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  @keyframes ctaDinoRun {
+    from { transform: translateX(0) scaleX(-1); }
+    to { transform: translateX(130vw) scaleX(-1); }
+  }
+  #ctaDecor .bubble {
+    position: absolute;
+    bottom: -40px;
+    border-radius: 50%;
+    opacity: 0;
+    animation-name: ctaBubbleFloat;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  @keyframes ctaBubbleFloat {
+    0% { transform: translate(0, 0); opacity: 0; }
+    10% { opacity: 0.5; }
+    90% { opacity: 0.5; }
+    100% { transform: translate(20px, -95vh); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #ctaDecor { display: none; }
+  }
   #cta h2 {
     position: relative;
     color: white;
@@ -274,6 +313,7 @@
 </section>
 
 <section id="cta">
+  <div id="ctaDecor" aria-hidden="true"></div>
   <h2>Pick your adventure! 🚀<span class="zh-sub">选择你的冒险吧！</span></h2>
   <div id="ctaChoices">
     <div class="ctaCard">
@@ -382,6 +422,39 @@ soundToggle.addEventListener("click", () => {
   syncSoundToggle();
   tapToStart.classList.add("hidden");
 });
+
+// ---------- CTA background decor: dinosaurs running + color bubbles
+// floating, behind the two adventure buttons. Deterministic-but-varied
+// (index math, not Math.random()) so it's identical on every reload
+// rather than jittering; positions/timings just need enough variety to
+// not look mechanically identical, not true randomness.
+const ctaDecor = document.getElementById("ctaDecor");
+const DINO_EMOJIS = ["🦖", "🦕"];
+const BUBBLE_COLORS = ["#ff6b6b", "#4ecdc4", "#ffd93d", "#6c5ce7", "#ff9ff3", "#54a0ff", "#1dd1a1"];
+
+for (let i = 0; i < 4; i++) {
+  const dino = document.createElement("span");
+  dino.className = "dino";
+  dino.textContent = DINO_EMOJIS[i % DINO_EMOJIS.length];
+  dino.style.top = `${15 + (i * 23) % 70}%`;
+  dino.style.fontSize = `${26 + (i * 7) % 22}px`;
+  dino.style.animationDuration = `${18 + (i * 5) % 16}s`;
+  dino.style.animationDelay = `-${(i * 4) % 14}s`;
+  ctaDecor.appendChild(dino);
+}
+
+for (let i = 0; i < 12; i++) {
+  const bubble = document.createElement("span");
+  bubble.className = "bubble";
+  const size = 12 + (i * 7) % 26;
+  bubble.style.left = `${(i * 8.5 + (i % 3) * 6) % 100}%`;
+  bubble.style.width = `${size}px`;
+  bubble.style.height = `${size}px`;
+  bubble.style.background = BUBBLE_COLORS[i % BUBBLE_COLORS.length];
+  bubble.style.animationDuration = `${12 + (i * 5) % 12}s`;
+  bubble.style.animationDelay = `-${(i * 3) % 14}s`;
+  ctaDecor.appendChild(bubble);
+}
 
 // ---------- Fighter jet icon (matches in-game jet art style) ----------
 function drawFighterJetIcon(ctx, x, y, w, h) {
