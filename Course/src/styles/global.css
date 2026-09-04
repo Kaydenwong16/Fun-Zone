@@ -510,6 +510,12 @@ code {
   align-items: center;
   gap: 10px;
   padding: 10px 20px;
+  /* Deliberately wider than .container's 1180px: with 9 nav items plus
+     the stats/Log out cluster, the header needs more room than the page
+     body does to show the nav as a row instead of the hamburger dropdown
+     on typical desktop widths. */
+  max-width: 1500px;
+  margin: 0 auto;
 }
 
 .brand {
@@ -544,6 +550,20 @@ code {
      already fits, since there's nothing under the fade to notice. */
   mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
   -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+}
+
+/* Measurement-only clone of the nav row — see Header.jsx's ResizeObserver
+   effect. Always laid out (never display: none) so its width can be read
+   in either direction, but invisible and out of the flow/off-screen so it
+   never affects real layout or is reachable by mouse/keyboard/AT. */
+.main-nav-measure {
+  display: flex;
+  gap: 2px;
+  position: fixed;
+  visibility: hidden;
+  top: -9999px;
+  left: -9999px;
+  pointer-events: none;
 }
 
 .main-nav::-webkit-scrollbar {
@@ -625,10 +645,6 @@ code {
   font-family: var(--font-zh);
 }
 
-.nav-toggle {
-  display: none;
-}
-
 .header-progress {
   height: 4px;
   padding: 0;
@@ -649,27 +665,29 @@ code {
   padding: 28px 24px 64px;
 }
 
-@media (max-width: 1220px) {
-  .main-nav {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: var(--paper);
-    flex-direction: column;
-    border-bottom: 1px solid var(--line);
-    box-shadow: var(--shadow-m);
-    display: none;
-    padding: 8px;
-    mask-image: none;
-    -webkit-mask-image: none;
-  }
-  .main-nav.is-open {
-    display: flex;
-  }
-  .nav-toggle {
-    display: inline-flex;
-  }
+/* Collapses into a dropdown menu whenever the nav row actually doesn't
+   have room for every item — driven by Header.jsx measuring
+   scrollWidth vs. clientWidth (a ResizeObserver), not a guessed pixel
+   breakpoint. That measurement is what "is-compact" reflects, so this
+   self-corrects automatically as nav items, translations, or fonts
+   change, instead of needing to keep re-tuning a magic width. */
+.main-nav.is-compact {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--paper);
+  flex-direction: column;
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow-m);
+  display: none;
+  padding: 8px;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+.main-nav.is-compact.is-open {
+  display: flex;
 }
 
 @media (max-width: 480px) {
