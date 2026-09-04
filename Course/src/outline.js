@@ -85,7 +85,7 @@ function render() {
         <div class="outline-header-inner container">
           <a href="./" class="brand" aria-label="Back to AI Builder Kids">
             <span class="brand-mark">🤖</span>
-            <span class="brand-text"><span class="en">AI Builder Kids</span><span class="zh">儿童AI课程</span></span>
+            <span class="brand-text"><span class="en">AI Builder Kids</span><span class="zh">儿童AI课程</span><span class="credit">（Claude）</span></span>
           </a>
           <button type="button" class="btn btn-secondary btn-sm no-print" onclick="window.print()">
             🖨️ <span class="en">Print</span><span class="zh">打印</span>
