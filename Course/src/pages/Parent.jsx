@@ -114,7 +114,7 @@ function ClassProgress({ t }) {
               <thead>
                 <tr>
                   <th>{t({ en: "Name", zh: "姓名" })}</th>
-                  <th>{t({ en: "Day", zh: "天数" })}</th>
+                  <th>{t({ en: "Chapter", zh: "章节" })}</th>
                   <th>{t({ en: "Lessons", zh: "课程" })}</th>
                   <th>XP</th>
                   <th>{t({ en: "Streak", zh: "连续" })}</th>
@@ -237,7 +237,7 @@ export default function Parent() {
       <div className="parent-stats-grid">
         <div className="card card-pad parent-stat">
           <span className="dash-stat-num">{progress.currentDay}/{TOTAL_DAYS}</span>
-          <span className="dash-stat-label">{t({ en: "Days Completed", zh: "已完成天数" })}</span>
+          <span className="dash-stat-label">{t({ en: "Chapters Completed", zh: "已完成章节" })}</span>
         </div>
         <div className="card card-pad parent-stat">
           <span className="dash-stat-num">{progress.completedLessons.length}/{TOTAL_LESSONS}</span>

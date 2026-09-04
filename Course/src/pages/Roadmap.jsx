@@ -28,7 +28,7 @@ export default function Roadmap({ onOpenLesson }) {
               const started = doneCount > 0;
               return (
                 <div key={weekNum} className={`roadmap-week-card card ${allDone ? "is-done" : started ? "is-active" : ""}`}>
-                  <div className="roadmap-week-days">{t({ en: `Day ${weekNum}`, zh: `第${weekNum}天` })}</div>
+                  <div className="roadmap-week-days">{t({ en: `Chapter ${weekNum}`, zh: `第${weekNum}章` })}</div>
                   <h3>{t({ en: `Week ${weekNum}`, zh: `第${weekNum}周` })}</h3>
                   <p className="roadmap-week-title">{t(week.title)}</p>
                   <div className="roadmap-week-lessons">
