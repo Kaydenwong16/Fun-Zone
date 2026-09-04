@@ -74,6 +74,13 @@
     display: block;
     margin-top: 2px;
   }
+  /* Bilingual subtitle line — same size, stacked below the English,
+     matching the h1's .chinese treatment above. Used anywhere on the
+     page a heading/label/caption needs its Chinese line. */
+  .zh-sub {
+    display: block;
+    margin-top: 2px;
+  }
   #heroOverlay p {
     color: #ffd54f;
     font-size: clamp(16px, 4vw, 22px);
@@ -202,6 +209,13 @@
     letter-spacing: 0.5px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
+  /* Chinese runs wider per character than English at the same size, so
+     at the button's fixed width a phrase like 玩战斗机游戏 can wrap
+     mid-word — shrink just this line rather than the whole button. */
+  .ctaButton .zh-sub {
+    font-size: 0.72em;
+    margin-top: 4px;
+  }
   #jetIconCanvas {
     display: block;
   }
@@ -249,32 +263,32 @@
   <video id="heroVideo" loop playsinline></video>
   <div id="heroOverlay">
     <h1>Kayden's Fun Zone 🌟<span class="chinese">黄奕海 Fun 空间</span></h1>
-    <p>Watch, laugh, and take off on an adventure!</p>
+    <p>Watch, laugh, and take off on an adventure!<span class="zh-sub">看视频，笑一笑，一起去冒险吧！</span></p>
     <button id="tapToStart">
       <span class="emoji">🔊</span>
       <span>Sound On 打开音频</span>
     </button>
   </div>
-  <button id="soundToggle" title="Toggle sound">🔊 Sound</button>
-  <button id="bounceHint" title="Scroll down" aria-label="Scroll down">⬇️</button>
+  <button id="soundToggle" title="Toggle sound 切换声音">🔊 Sound 声音</button>
+  <button id="bounceHint" title="Scroll down 向下滚动" aria-label="Scroll down 向下滚动">⬇️</button>
 </section>
 
 <section id="cta">
-  <h2>Pick your adventure! 🚀</h2>
+  <h2>Pick your adventure! 🚀<span class="zh-sub">选择你的冒险吧！</span></h2>
   <div id="ctaChoices">
     <div class="ctaCard">
       <a class="ctaButton" id="courseButton" href="/course-app/">
         <span id="courseEmoji">🤖</span>
         <span>AI Builder Kids</span>
       </a>
-      <p class="sub">Learn to build and code with AI!</p>
+      <p class="sub">Learn to build and code with AI!<span class="zh-sub">和AI一起学习编程、动手创造！</span></p>
     </div>
     <div class="ctaCard">
       <a class="ctaButton" id="jetButton" href="/game/">
         <canvas id="jetIconCanvas" width="120" height="140"></canvas>
-        <span>Play Fighter Jet Game!</span>
+        <span>Play Fighter Jet Game!<span class="zh-sub">玩战斗机游戏！</span></span>
       </a>
-      <p class="sub">Blast off and battle enemy jets — tap to start!</p>
+      <p class="sub">Blast off and battle enemy jets — tap to start!<span class="zh-sub">起飞迎战敌机——点击开始！</span></p>
     </div>
   </div>
 </section>
@@ -313,7 +327,7 @@ document.getElementById("bounceHint").addEventListener("click", () => {
 const soundToggle = document.getElementById("soundToggle");
 const tapToStart = document.getElementById("tapToStart");
 function syncSoundToggle() {
-  soundToggle.textContent = heroVideo.muted ? "🔇 Sound" : "🔊 Sound";
+  soundToggle.textContent = heroVideo.muted ? "🔇 Sound 声音" : "🔊 Sound 声音";
 }
 
 // Browsers block audible autoplay before any user gesture on the page —
