@@ -1768,6 +1768,34 @@ code {
    PARENT DASHBOARD
    ========================================================================== */
 
+.parent-section-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  margin: 26px 0 12px;
+}
+
+.class-progress-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.class-progress-table th,
+.class-progress-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+.class-progress-table th {
+  color: var(--ink-soft);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 .parent-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -1930,6 +1958,15 @@ code {
   border-radius: var(--radius-m);
   border: 1.5px solid var(--line);
   font-size: 15px;
+}
+
+.auth-error {
+  color: var(--red);
+  background: var(--red-tint);
+  border-radius: var(--radius-s);
+  padding: 9px 12px;
+  font-size: 13.5px;
+  margin-bottom: 14px;
 }
 
 /* ==========================================================================

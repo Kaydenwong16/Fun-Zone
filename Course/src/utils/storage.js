@@ -8,6 +8,7 @@ const KEYS = {
   profile: "abk_profile_v1",
   progress: "abk_progress_v1",
   projects: "abk_projects_v1",
+  session: "abk_session_v1",
 };
 
 function readJSON(key, fallback) {
@@ -73,6 +74,31 @@ export function resetAll() {
     window.localStorage.removeItem(KEYS.profile);
     window.localStorage.removeItem(KEYS.progress);
     window.localStorage.removeItem(KEYS.projects);
+    window.localStorage.removeItem(KEYS.session);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ---- cloud account session --------------------------------------------
+// Remembers the name + password used to log in, so this device can quietly
+// sync progress to the server without asking again. Kept separate from
+// `profile` so it's never accidentally rendered anywhere. This is a kids'
+// app with no sensitive data behind it — plaintext is an acceptable
+// trade-off for "don't make a kid retype a password every visit".
+
+export function getSession() {
+  return readJSON(KEYS.session, null);
+}
+
+export function saveSession(name, password) {
+  return writeJSON(KEYS.session, { name, password });
+}
+
+export function clearSession() {
+  try {
+    window.localStorage.removeItem(KEYS.session);
     return true;
   } catch {
     return false;

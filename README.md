@@ -1,11 +1,13 @@
 # Fighter-Jet
 
 Kayden's Fun Zone — a kids' landing page (`Website/index.html`, served at `/`) with a rotating
-hero video, linking through to Kayden's Jet Battle, a browser-based fighter jet shooter game
-(`game/index.html`, served at `/game/`).
+hero video, linking to two things: Kayden's Jet Battle, a browser-based fighter jet shooter game
+(`game/index.html`, served at `/game/`), and AI Builder Kids, a 90-day course app (built from
+`Course/`, its static output committed at `course-app/`, served at `/course-app/` — see
+`Course/README.md`).
 
-The root `vercel.json` rewrites `/` to `Website/index.html`; `/game/` is served automatically
-from the `game/` folder.
+The root `vercel.json` rewrites `/` to `Website/index.html`; `/game/` and `/course-app/` are
+served automatically as static folders.
 
 ## Play
 
@@ -29,3 +31,18 @@ Redis. This needs a one-time setup in the Vercel dashboard before it'll work:
 
 Until this is done, `/api/leaderboard` returns an error and the game quietly falls back to
 showing "No scores yet" instead of breaking.
+
+## Course student accounts & teacher view setup
+
+AI Builder Kids (`/course-app/`) uses the *same* Upstash Redis database above (via
+`api/course-account.js`) to give each student their own name+password account, synced across
+devices. That part needs no extra setup once step 1 above is done.
+
+The teacher view (a passcode-gated table of every student's progress, on the course app's
+Parent & Teacher Dashboard page) needs one more env var:
+
+1. Vercel dashboard → project → **Settings** → **Environment Variables** → add
+   `TEACHER_PASSWORD` with a passcode you choose (share it only with the teacher).
+2. Redeploy so it takes effect.
+
+Until set, the teacher view shows a clear "not set up yet" message rather than failing silently.
