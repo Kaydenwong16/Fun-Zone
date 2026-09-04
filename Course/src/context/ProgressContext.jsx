@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { getProgress, saveProgress, resetAll } from "../utils/storage.js";
+import { getProgress, saveProgress, resetAll, getSession } from "../utils/storage.js";
+import { syncAccount } from "../utils/account.js";
 import {
   addXP,
   completeLesson as completeLessonFn,
@@ -12,16 +13,28 @@ import {
 import { BADGES } from "../data/badges.js";
 
 const ProgressContext = createContext(null);
+const SYNC_DEBOUNCE_MS = 1500;
 
 export function ProgressProvider({ children }) {
   const [progress, setProgress] = useState(() => touchStreak(getProgress()));
   const [toast, setToast] = useState(null); // { xp, key }
   const [badgeUnlock, setBadgeUnlock] = useState(null); // badge object
   const toastKey = useRef(0);
+  const syncTimer = useRef(null);
 
-  // persist on every change
+  // persist on every change, and — if this device is linked to a cloud
+  // account — quietly sync it to the server after a short pause so another
+  // device can pick up the same progress later.
   useEffect(() => {
     saveProgress(progress);
+
+    const session = getSession();
+    if (!session) return;
+    window.clearTimeout(syncTimer.current);
+    syncTimer.current = window.setTimeout(() => {
+      syncAccount({ name: session.name, password: session.password, progress });
+    }, SYNC_DEBOUNCE_MS);
+    return () => window.clearTimeout(syncTimer.current);
   }, [progress]);
 
   const showXP = useCallback((amount) => {
@@ -96,6 +109,15 @@ export function ProgressProvider({ children }) {
     setProgress(getProgress());
   }, []);
 
+  // Replaces local progress with what a cloud account had saved — used
+  // right after a successful login so a returning kid resumes instead of
+  // starting over.
+  const loadProgress = useCallback((next) => {
+    if (!next) return;
+    const withDefaults = touchStreak({ ...getProgress(), ...next });
+    setProgress(withDefaults);
+  }, []);
+
   const dismissBadge = useCallback(() => setBadgeUnlock(null), []);
 
   const level = levelForXP(progress.xp);
@@ -115,6 +137,7 @@ export function ProgressProvider({ children }) {
       setCurrentLesson,
       advanceDay,
       reset,
+      loadProgress,
       dismissBadge,
     }),
     [
@@ -130,6 +153,7 @@ export function ProgressProvider({ children }) {
       setCurrentLesson,
       advanceDay,
       reset,
+      loadProgress,
       dismissBadge,
     ]
   );

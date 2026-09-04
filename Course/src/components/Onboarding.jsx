@@ -1,18 +1,73 @@
 import { useState } from "react";
 import { useLanguage } from "../context/LanguageContext.jsx";
+import { useProgress } from "../context/ProgressContext.jsx";
+import { authAccount } from "../utils/account.js";
+import { getProgress, saveSession } from "../utils/storage.js";
 
 const AVATARS = ["🤖", "🦊", "🐼", "🦄", "🐯", "🐸", "🐙", "🦁"];
+const MIN_PASSWORD_LEN = 4;
 
 export default function Onboarding({ onFinish }) {
   const { t, setLanguage, updateProfile } = useLanguage();
+  const { loadProgress } = useProgress();
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState(AVATARS[0]);
   const [lang, setLang] = useState("bi");
+  const [authError, setAuthError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const finish = () => {
+  const finish = async () => {
+    const cleanName = name.trim() || "Builder";
     setLanguage(lang);
-    updateProfile({ name: name.trim() || "Builder", avatar, language: lang, onboarded: true });
+    setAuthError("");
+
+    if (password.length < MIN_PASSWORD_LEN) {
+      setAuthError(
+        t({
+          en: `Password needs at least ${MIN_PASSWORD_LEN} characters.`,
+          zh: `密码至少需要${MIN_PASSWORD_LEN}个字符。`,
+        })
+      );
+      return;
+    }
+
+    setBusy(true);
+    const result = await authAccount({
+      name: cleanName,
+      password,
+      profile: { name: cleanName, avatar, language: lang },
+      progress: getProgress(),
+    });
+    setBusy(false);
+
+    if (!result.ok) {
+      if (result.error === "wrong-password") {
+        setAuthError(
+          t({
+            en: "That password doesn't match this name. Try again, or use a different name.",
+            zh: "密码与这个名字不匹配。请重试，或换一个名字。",
+          })
+        );
+        return;
+      }
+      // Backend unreachable/not configured — don't block play, just keep
+      // this device local-only (matches the old, pre-account behavior).
+      updateProfile({ name: cleanName, avatar, language: lang, onboarded: true });
+      onFinish();
+      return;
+    }
+
+    saveSession(cleanName, password);
+    if (!result.data.isNewAccount && result.data.progress) {
+      loadProgress(result.data.progress);
+    }
+    const serverProfile = result.data.profile;
+    updateProfile({
+      ...(serverProfile || { name: cleanName, avatar, language: lang }),
+      onboarded: true,
+    });
     onFinish();
   };
 
@@ -51,6 +106,18 @@ export default function Onboarding({ onFinish }) {
               autoFocus
             />
             <h3 className="onboarding-subq">
+              <span className="en">Create a password — you'll use it to log back in and keep your progress</span>{" "}
+              <span className="zh">创建一个密码——用它登录，保留你的进度</span>
+            </h3>
+            <input
+              className="name-input onboarding-input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t({ en: "Password", zh: "密码" })}
+              minLength={MIN_PASSWORD_LEN}
+            />
+            <h3 className="onboarding-subq">
               <span className="en">Pick an avatar</span> <span className="zh">选择一个头像</span>
             </h3>
             <div className="avatar-grid">
@@ -65,7 +132,12 @@ export default function Onboarding({ onFinish }) {
                 </button>
               ))}
             </div>
-            <button type="button" className="btn btn-primary" onClick={() => setStep(2)}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={!name.trim() || password.length < MIN_PASSWORD_LEN}
+              onClick={() => setStep(2)}
+            >
               Next · 下一步
             </button>
           </>
@@ -88,8 +160,11 @@ export default function Onboarding({ onFinish }) {
                 English + 中文
               </button>
             </div>
-            <button type="button" className="btn btn-primary" onClick={finish}>
-              {t({ en: "Start Day 1", zh: "开始第1天" })} →
+            {authError && <p className="auth-error">{authError}</p>}
+            <button type="button" className="btn btn-primary" disabled={busy} onClick={finish}>
+              {busy
+                ? t({ en: "Checking…", zh: "登录中…" })
+                : `${t({ en: "Start Day 1", zh: "开始第1天" })} →`}
             </button>
           </>
         )}

@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useLanguage, UI_STRINGS } from "../context/LanguageContext.jsx";
 import { useProgress } from "../context/ProgressContext.jsx";
 import { speechSupported, recognitionSupported } from "../utils/speech.js";
+import { authAccount } from "../utils/account.js";
+import { getSession, saveSession, clearSession } from "../utils/storage.js";
+
+const MIN_PASSWORD_LEN = 4;
 
 const LANGS = [
   { key: "en", en: "English", zh: "" },
@@ -11,14 +15,53 @@ const LANGS = [
 
 export default function SettingsPanel({ onClose }) {
   const { t, language, setLanguage, profile, updateProfile } = useLanguage();
-  const { reset } = useProgress();
+  const { progress, reset } = useProgress();
   const [confirmReset, setConfirmReset] = useState(false);
+  const [session, setSession] = useState(() => getSession());
+  const [linkPassword, setLinkPassword] = useState("");
+  const [linkBusy, setLinkBusy] = useState(false);
+  const [linkError, setLinkError] = useState("");
 
   const doReset = () => {
     reset();
     setConfirmReset(false);
     onClose?.();
     window.location.reload();
+  };
+
+  const doLink = async () => {
+    setLinkError("");
+    if (linkPassword.length < MIN_PASSWORD_LEN) {
+      setLinkError(t({ en: `Password needs at least ${MIN_PASSWORD_LEN} characters.`, zh: `密码至少需要${MIN_PASSWORD_LEN}个字符。` }));
+      return;
+    }
+    setLinkBusy(true);
+    const result = await authAccount({
+      name: profile.name,
+      password: linkPassword,
+      profile,
+      progress,
+    });
+    setLinkBusy(false);
+    if (!result.ok) {
+      setLinkError(
+        result.error === "wrong-password"
+          ? t({
+              en: "That name already has a different password. Try that password, or change your name above first.",
+              zh: "这个名字已经用了另一个密码。请尝试那个密码，或先在上面修改你的名字。",
+            })
+          : t({ en: "Couldn't reach the server. Try again in a moment.", zh: "无法连接服务器，请稍后再试。" })
+      );
+      return;
+    }
+    saveSession(profile.name, linkPassword);
+    setSession({ name: profile.name, password: linkPassword });
+    setLinkPassword("");
+  };
+
+  const doLogout = () => {
+    clearSession();
+    setSession(null);
   };
 
   return (
@@ -69,6 +112,46 @@ export default function SettingsPanel({ onClose }) {
             onChange={(e) => updateProfile({ name: e.target.value })}
             placeholder={t({ en: "Your name", zh: "你的名字" })}
           />
+        </div>
+
+        <div className="settings-block">
+          <h3>{t({ en: "Cloud Account", zh: "云账户" })}</h3>
+          {session ? (
+            <>
+              <p className="settings-note">
+                {t({
+                  en: `✓ Signed in as "${session.name}". Progress syncs automatically and follows you to any device.`,
+                  zh: `✓ 已使用"${session.name}"登录。进度会自动同步，可在任何设备上继续。`,
+                })}
+              </p>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={doLogout}>
+                {t({ en: "Log out", zh: "退出登录" })}
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="settings-note">
+                {t({
+                  en: "Not linked to a cloud account yet — progress only lives on this device. Set a password to back it up and log in elsewhere.",
+                  zh: "还没有关联云账户——进度只保存在这台设备上。设置密码即可备份，并在其他设备登录。",
+                })}
+              </p>
+              <input
+                className="name-input"
+                type="password"
+                value={linkPassword}
+                onChange={(e) => setLinkPassword(e.target.value)}
+                placeholder={t({ en: "Create a password", zh: "创建密码" })}
+                style={{ marginBottom: 8 }}
+              />
+              {linkError && <p className="auth-error">{linkError}</p>}
+              <button type="button" className="btn btn-primary btn-sm" disabled={linkBusy} onClick={doLink}>
+                {linkBusy
+                  ? t({ en: "Saving…", zh: "保存中…" })
+                  : t({ en: "Save progress to the cloud", zh: "将进度保存到云端" })}
+              </button>
+            </>
+          )}
         </div>
 
         <div className="settings-block">
