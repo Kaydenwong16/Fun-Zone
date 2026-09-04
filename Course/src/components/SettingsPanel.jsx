@@ -3,7 +3,7 @@ import { useLanguage, UI_STRINGS } from "../context/LanguageContext.jsx";
 import { useProgress } from "../context/ProgressContext.jsx";
 import { speechSupported, recognitionSupported } from "../utils/speech.js";
 import { authAccount } from "../utils/account.js";
-import { getSession, saveSession, clearSession } from "../utils/storage.js";
+import { getSession, saveSession, logoutDevice, markDeviceKnown } from "../utils/storage.js";
 
 const MIN_PASSWORD_LEN = 4;
 
@@ -17,6 +17,7 @@ export default function SettingsPanel({ onClose }) {
   const { t, language, setLanguage, profile, updateProfile } = useLanguage();
   const { progress, reset } = useProgress();
   const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const [session, setSession] = useState(() => getSession());
   const [linkPassword, setLinkPassword] = useState("");
   const [linkBusy, setLinkBusy] = useState(false);
@@ -55,13 +56,29 @@ export default function SettingsPanel({ onClose }) {
       return;
     }
     saveSession(profile.name, linkPassword);
+    markDeviceKnown();
     setSession({ name: profile.name, password: linkPassword });
     setLinkPassword("");
   };
 
   const doLogout = () => {
-    clearSession();
-    setSession(null);
+    // Clears this student's local profile/progress/session so the next
+    // person to open the app is prompted to log in — lets a different
+    // student switch into their own account on the same device. Safe to
+    // do immediately when synced to a cloud account (progress lives on
+    // the server too); otherwise doLogout is only reached after the
+    // confirm step below, since this device is the only copy.
+    logoutDevice();
+    onClose?.();
+    window.location.reload();
+  };
+
+  const handleLogoutClick = () => {
+    if (session) {
+      doLogout();
+    } else {
+      setConfirmLogout(true);
+    }
   };
 
   return (
@@ -117,17 +134,12 @@ export default function SettingsPanel({ onClose }) {
         <div className="settings-block">
           <h3>{t({ en: "Cloud Account", zh: "云账户" })}</h3>
           {session ? (
-            <>
-              <p className="settings-note">
-                {t({
-                  en: `✓ Signed in as "${session.name}". Progress syncs automatically and follows you to any device.`,
-                  zh: `✓ 已使用"${session.name}"登录。进度会自动同步，可在任何设备上继续。`,
-                })}
-              </p>
-              <button type="button" className="btn btn-ghost btn-sm" onClick={doLogout}>
-                {t({ en: "Log out", zh: "退出登录" })}
-              </button>
-            </>
+            <p className="settings-note">
+              {t({
+                en: `✓ Signed in as "${session.name}". Progress syncs automatically and follows you to any device.`,
+                zh: `✓ 已使用"${session.name}"登录。进度会自动同步，可在任何设备上继续。`,
+              })}
+            </p>
           ) : (
             <>
               <p className="settings-note">
@@ -151,6 +163,36 @@ export default function SettingsPanel({ onClose }) {
                   : t({ en: "Save progress to the cloud", zh: "将进度保存到云端" })}
               </button>
             </>
+          )}
+        </div>
+
+        <div className="settings-block">
+          <h3>{t({ en: "Switch Student", zh: "切换学生" })}</h3>
+          <p className="settings-note">
+            {t({
+              en: "Log out so another student can log in with their own name and password.",
+              zh: "退出登录，让另一位学生用自己的名字和密码登录。",
+            })}
+          </p>
+          {!confirmLogout ? (
+            <button type="button" className="btn btn-ghost btn-sm" onClick={handleLogoutClick}>
+              {t({ en: "Log out", zh: "退出登录" })}
+            </button>
+          ) : (
+            <div className="reset-confirm">
+              <p className="auth-error">
+                {t({
+                  en: "This profile isn't linked to a cloud account (above), so logging out erases its progress from this device for good. Link it first, or continue to log out anyway?",
+                  zh: "此资料尚未关联云账户（见上方），退出登录将永久清除本机上的进度。请先关联账户，或仍要退出登录？",
+                })}
+              </p>
+              <button type="button" className="btn btn-danger btn-sm" onClick={doLogout}>
+                {t({ en: "Log out anyway", zh: "仍要退出登录" })}
+              </button>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setConfirmLogout(false)}>
+                {t({ en: "Cancel", zh: "取消" })}
+              </button>
+            </div>
           )}
         </div>
 
