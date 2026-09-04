@@ -226,6 +226,30 @@ module.exports = async (req, res) => {
       return;
     }
 
+    if (action === 'delete') {
+      // Lets a student abandon a mistaken/test account. Requires the
+      // correct password, same as any other action here.
+      if (!password) {
+        res.status(400).json({ error: 'missing-password' });
+        return;
+      }
+      const key = accountKey(name);
+      const raw = await upstash(url, token, ['GET', key]);
+      if (!raw) {
+        res.status(200).json({ success: true }); // already gone
+        return;
+      }
+      const record = JSON.parse(raw);
+      if (hashPassword(password, record.salt) !== record.passwordHash) {
+        res.status(401).json({ error: 'wrong-password' });
+        return;
+      }
+      await upstash(url, token, ['DEL', key]);
+      await upstash(url, token, ['SREM', INDEX_KEY, name.toLowerCase()]);
+      res.status(200).json({ success: true });
+      return;
+    }
+
     res.status(400).json({ error: 'unknown-action' });
   } catch (e) {
     res.status(500).json({ error: 'Account request failed.', detail: e.message });
