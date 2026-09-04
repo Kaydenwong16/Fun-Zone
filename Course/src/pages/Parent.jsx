@@ -8,6 +8,7 @@ import { overallCompletionPct } from "../utils/progress.js";
 import { fetchClassProgress, fetchLoginLog } from "../utils/account.js";
 
 const TEACHER_SESSION_KEY = "abk_teacher_pw";
+const LOGIN_LOG_PAGE_SIZE = 8;
 
 function ClassProgress({ t }) {
   const [teacherPassword, setTeacherPassword] = useState(() => {
@@ -20,13 +21,18 @@ function ClassProgress({ t }) {
   const [unlocked, setUnlocked] = useState(false);
   const [students, setStudents] = useState(null);
   const [logins, setLogins] = useState(null);
+  const [hasMoreLogins, setHasMoreLogins] = useState(false);
+  const [loginsBusy, setLoginsBusy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
   const load = async (pw) => {
     setBusy(true);
     setError("");
-    const [progressResult, loginResult] = await Promise.all([fetchClassProgress(pw), fetchLoginLog(pw)]);
+    const [progressResult, loginResult] = await Promise.all([
+      fetchClassProgress(pw),
+      fetchLoginLog(pw, { limit: LOGIN_LOG_PAGE_SIZE, offset: 0 }),
+    ]);
     setBusy(false);
     if (!progressResult.ok) {
       setUnlocked(false);
@@ -45,11 +51,21 @@ function ClassProgress({ t }) {
     setUnlocked(true);
     setStudents(progressResult.data.students || []);
     setLogins(loginResult.ok ? loginResult.data.logins || [] : []);
+    setHasMoreLogins(loginResult.ok ? !!loginResult.data.hasMore : false);
     try {
       window.sessionStorage.setItem(TEACHER_SESSION_KEY, pw);
     } catch {
       /* ignore */
     }
+  };
+
+  const loadMoreLogins = async () => {
+    setLoginsBusy(true);
+    const result = await fetchLoginLog(teacherPassword, { limit: LOGIN_LOG_PAGE_SIZE, offset: (logins || []).length });
+    setLoginsBusy(false);
+    if (!result.ok) return;
+    setLogins((prev) => [...(prev || []), ...(result.data.logins || [])]);
+    setHasMoreLogins(!!result.data.hasMore);
   };
 
   // Auto-unlock if this tab already has the passcode from earlier.
@@ -135,30 +151,51 @@ function ClassProgress({ t }) {
         {!logins || logins.length === 0 ? (
           <p>{t({ en: "No logins recorded yet.", zh: "还没有登录记录。" })}</p>
         ) : (
-          <div style={{ overflowX: "auto", maxHeight: 320, overflowY: "auto" }}>
-            <table className="class-progress-table">
-              <thead>
-                <tr>
-                  <th>{t({ en: "Name", zh: "姓名" })}</th>
-                  <th>{t({ en: "Logged In At", zh: "登录时间" })}</th>
-                  <th>{t({ en: "Type", zh: "类型" })}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logins.map((entry, i) => (
-                  <tr key={i}>
-                    <td>{entry.name}</td>
-                    <td>{new Date(entry.at).toLocaleString()}</td>
-                    <td>
-                      {entry.isNewAccount
-                        ? t({ en: "New account", zh: "新账户" })
-                        : t({ en: "Returning", zh: "返回登录" })}
-                    </td>
+          <>
+            <div style={{ overflowX: "auto" }}>
+              <table className="class-progress-table">
+                <thead>
+                  <tr>
+                    <th>{t({ en: "Name", zh: "姓名" })}</th>
+                    <th>{t({ en: "Logged In At", zh: "登录时间" })}</th>
+                    <th>{t({ en: "Type", zh: "类型" })}</th>
+                    <th>{t({ en: "Ended At", zh: "结束时间" })}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {logins.map((entry, i) => (
+                    <tr key={i}>
+                      <td>{entry.name}</td>
+                      <td>{new Date(entry.loginAt).toLocaleString()}</td>
+                      <td>
+                        {entry.isNewAccount
+                          ? t({ en: "New account", zh: "新账户" })
+                          : t({ en: "Returning", zh: "返回登录" })}
+                      </td>
+                      <td>
+                        {!entry.endedAt ? (
+                          t({ en: "Still active", zh: "仍在使用" })
+                        ) : (
+                          <>
+                            {new Date(entry.endedAt).toLocaleString()}
+                            {" · "}
+                            {entry.endReason === "logout"
+                              ? t({ en: "logged out", zh: "已退出登录" })
+                              : t({ en: "became inactive", zh: "已无操作" })}
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {hasMoreLogins && (
+              <button type="button" className="btn btn-ghost btn-sm" style={{ marginTop: 10 }} onClick={loadMoreLogins} disabled={loginsBusy}>
+                {loginsBusy ? t({ en: "Loading…", zh: "加载中…" }) : t({ en: "More", zh: "更多" })}
+              </button>
+            )}
+          </>
         )}
       </div>
 

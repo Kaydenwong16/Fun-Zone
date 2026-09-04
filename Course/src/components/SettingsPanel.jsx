@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLanguage, UI_STRINGS } from "../context/LanguageContext.jsx";
 import { useProgress } from "../context/ProgressContext.jsx";
 import { speechSupported, recognitionSupported } from "../utils/speech.js";
-import { authAccount } from "../utils/account.js";
+import { authAccount, endSession } from "../utils/account.js";
 import { getSession, saveSession, logoutDevice, markDeviceKnown } from "../utils/storage.js";
 
 const MIN_PASSWORD_LEN = 4;
@@ -76,13 +76,18 @@ export default function SettingsPanel({ onClose }) {
       );
       return;
     }
-    saveSession(profile.name, linkPassword);
+    saveSession(profile.name, linkPassword, result.data.sessionId);
     markDeviceKnown();
-    setSession({ name: profile.name, password: linkPassword });
+    setSession({ name: profile.name, password: linkPassword, sessionId: result.data.sessionId });
     setLinkPassword("");
   };
 
-  const doLogout = () => {
+  const doLogout = async () => {
+    // Records this as an explicit logout (vs. becoming inactive) on the
+    // teacher's login log, before clearing anything locally.
+    if (session?.sessionId) {
+      await endSession(session.sessionId, "logout");
+    }
     // Clears this student's local profile/progress/session so the next
     // person to open the app is prompted to log in — lets a different
     // student switch into their own account on the same device. Safe to

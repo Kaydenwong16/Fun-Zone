@@ -42,7 +42,30 @@ export function fetchClassProgress(teacherPassword) {
   return call({ action: "teacherList", teacherPassword });
 }
 
-/** Teacher-only: fetches the login history log (newest first). */
-export function fetchLoginLog(teacherPassword, limit) {
-  return call({ action: "teacherLoginLog", teacherPassword, limit });
+/** Teacher-only: fetches one page of the login history log (newest
+ * first). Returns { logins, hasMore } so the caller's "More" button
+ * knows whether there's anything left to load. */
+export function fetchLoginLog(teacherPassword, { limit, offset } = {}) {
+  return call({ action: "teacherLoginLog", teacherPassword, limit, offset });
+}
+
+/** Records a session's actual end — an explicit logout, or (best-effort,
+ * via sendBeacon on pagehide) becoming inactive by closing the tab or
+ * navigating away without logging out. The session id alone is the
+ * credential; no password needed for this one. */
+export function endSession(sessionId, reason) {
+  return call({ action: "endSession", sessionId, reason });
+}
+
+/** Same as endSession, but fires via navigator.sendBeacon instead of
+ * fetch — the only reliable way to get a request out during pagehide,
+ * since the page may already be gone before a fetch's promise settles.
+ * No response to read (sendBeacon is fire-and-forget), so this doesn't
+ * go through call(). */
+export function endSessionBeacon(sessionId, reason) {
+  if (typeof navigator === "undefined" || !navigator.sendBeacon) return false;
+  const blob = new Blob([JSON.stringify({ action: "endSession", sessionId, reason })], {
+    type: "application/json",
+  });
+  return navigator.sendBeacon(ENDPOINT, blob);
 }

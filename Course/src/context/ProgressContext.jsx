@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getProgress, saveProgress, resetAll, getSession, DEFAULT_PROGRESS } from "../utils/storage.js";
-import { syncAccount } from "../utils/account.js";
+import { syncAccount, endSessionBeacon } from "../utils/account.js";
 import {
   addXP,
   completeLesson as completeLessonFn,
@@ -57,6 +57,27 @@ export function ProgressProvider({ children }) {
       syncAccount({ name: session.name, password: session.password, progress: progressRef.current });
     }, AUTO_SAVE_INTERVAL_MS);
     return () => window.clearInterval(interval);
+  }, []);
+
+  // If a linked student closes the tab / navigates away without clicking
+  // Log out, this is the "became inactive at" signal the teacher's login
+  // log falls back to (vs. an explicit logout time from SettingsPanel).
+  // pagehide (not beforeunload/visibilitychange) fires specifically on
+  // actual navigation-away/tab-close, not on a plain tab switch — and
+  // sendBeacon is used instead of fetch since a normal request can get
+  // cancelled mid-flight once the page starts unloading. Best-effort
+  // only: doesn't fire on a crash or force-quit. Endpoint is idempotent
+  // (a session already closed by an explicit logout is left alone), so
+  // this never overwrites a real logout time.
+  useEffect(() => {
+    const handlePageHide = () => {
+      const session = getSession();
+      if (session?.sessionId) {
+        endSessionBeacon(session.sessionId, "inactive");
+      }
+    };
+    window.addEventListener("pagehide", handlePageHide);
+    return () => window.removeEventListener("pagehide", handlePageHide);
   }, []);
 
   const showXP = useCallback((amount) => {

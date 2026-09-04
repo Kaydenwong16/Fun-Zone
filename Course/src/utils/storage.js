@@ -132,8 +132,13 @@ export function getSession() {
   return readJSON(KEYS.session, null);
 }
 
-export function saveSession(name, password) {
-  return writeJSON(KEYS.session, { name, password });
+// sessionId (from the server's 'auth' response) is what lets endSession
+// later record this exact session's actual end time — an explicit logout,
+// or becoming inactive (tab closed/navigated away) — on the login log a
+// teacher sees. Optional third arg so existing call sites don't break;
+// a session saved without one just can't be closed out server-side later.
+export function saveSession(name, password, sessionId) {
+  return writeJSON(KEYS.session, { name, password, sessionId: sessionId || null });
 }
 
 export function clearSession() {
