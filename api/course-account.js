@@ -9,7 +9,15 @@ const crypto = require('crypto');
 
 const KEY_PREFIX = 'courseAccount:';
 const INDEX_KEY = 'courseAccountIndex';
-const LOGIN_LOG_KEY = 'courseLoginLog';
+// LOGIN_LOG_KEY holds session IDs (newest first), not the sessions
+// themselves — each session is its own key (SESSION_KEY_PREFIX + id) so a
+// session can be found again and updated with its end time. A new key
+// name (not the old 'courseLoginLog' plain-JSON-entries list from before
+// session tracking existed) — those old entries aren't session IDs and
+// would just resolve to nothing, which is fine, but a distinct name keeps
+// that obvious rather than silently mixing formats.
+const LOGIN_LOG_KEY = 'courseLoginLogV2';
+const SESSION_KEY_PREFIX = 'courseLoginSession:';
 const MAX_LOGIN_LOG_ENTRIES = 1000;
 const MIN_PASSWORD_LEN = 4;
 const MAX_NAME_LEN = 24;
@@ -66,14 +74,27 @@ function accountKey(name) {
   return KEY_PREFIX + name.trim().toLowerCase();
 }
 
-// Appends one login event (newest first) to a capped list — a running
-// history the teacher can review, distinct from each student's own
-// record (which only ever holds their *current* progress, not a log of
-// when they logged in).
-async function logLogin(url, token, displayName, isNewAccount) {
-  const entry = JSON.stringify({ name: displayName, at: new Date().toISOString(), isNewAccount });
-  await upstash(url, token, ['LPUSH', LOGIN_LOG_KEY, entry]);
+// Starts one login session — a running history the teacher can review,
+// distinct from each student's own record (which only ever holds their
+// *current* progress, not a log of when they logged in or for how long).
+// Returns the session id, which the client holds onto and sends back
+// later to close the session out (endSession) with either an explicit
+// logout time or a "became inactive" time (tab closed/navigated away
+// without logging out) — see endSession and Course/src/context/
+// ProgressContext.jsx's pagehide handler.
+async function startSession(url, token, displayName, isNewAccount) {
+  const sessionId = crypto.randomBytes(12).toString('hex');
+  const session = {
+    name: displayName,
+    loginAt: new Date().toISOString(),
+    endedAt: null,
+    endReason: null, // 'logout' | 'inactive', once ended
+    isNewAccount
+  };
+  await upstash(url, token, ['SET', SESSION_KEY_PREFIX + sessionId, JSON.stringify(session)]);
+  await upstash(url, token, ['LPUSH', LOGIN_LOG_KEY, sessionId]);
   await upstash(url, token, ['LTRIM', LOGIN_LOG_KEY, 0, MAX_LOGIN_LOG_ENTRIES - 1]);
+  return sessionId;
 }
 
 function timingSafeStringEqual(a, b) {
@@ -165,18 +186,56 @@ module.exports = async (req, res) => {
         res.status(401).json({ error: 'wrong-teacher-password' });
         return;
       }
-      const limit = Math.min(500, Math.max(1, Number(body.limit) || 200));
-      const raws = (await upstash(url, token, ['LRANGE', LOGIN_LOG_KEY, 0, limit - 1])) || [];
+      // Paginated (default page size 8, matching the "More" button in the
+      // teacher view) rather than returning everything at once.
+      const limit = Math.min(100, Math.max(1, Number(body.limit) || 8));
+      const offset = Math.max(0, Number(body.offset) || 0);
+      const [ids, total] = await Promise.all([
+        upstash(url, token, ['LRANGE', LOGIN_LOG_KEY, offset, offset + limit - 1]),
+        upstash(url, token, ['LLEN', LOGIN_LOG_KEY])
+      ]);
+      const raws = await upstashPipeline(url, token, (ids || []).map((id) => ['GET', SESSION_KEY_PREFIX + id]));
       const logins = raws
         .map((raw) => {
           try {
-            return JSON.parse(raw);
+            return raw ? JSON.parse(raw) : null;
           } catch {
             return null;
           }
         })
         .filter(Boolean);
-      res.status(200).json({ success: true, logins });
+      res.status(200).json({ success: true, logins, hasMore: offset + (ids || []).length < (total || 0) });
+      return;
+    }
+
+    if (action === 'endSession') {
+      // Records when a session actually ended — an explicit logout, or
+      // (via a pagehide/sendBeacon best-effort signal, so not guaranteed
+      // for a crash/force-quit) simply becoming inactive by closing the
+      // tab or navigating away without logging out. The session id itself
+      // is the credential here — it's a random, unguessable 24-hex-char
+      // value only the browser that started the session ever received, so
+      // this deliberately doesn't also require the account password (a
+      // logout/unload is not a sensitive action worth another round trip).
+      const sessionId = String(body.sessionId || '');
+      const reason = body.reason === 'logout' ? 'logout' : 'inactive';
+      if (!sessionId) {
+        res.status(400).json({ error: 'missing-session-id' });
+        return;
+      }
+      const raw = await upstash(url, token, ['GET', SESSION_KEY_PREFIX + sessionId]);
+      if (raw) {
+        const session = JSON.parse(raw);
+        if (!session.endedAt) {
+          session.endedAt = new Date().toISOString();
+          session.endReason = reason;
+          await upstash(url, token, ['SET', SESSION_KEY_PREFIX + sessionId, JSON.stringify(session)]);
+        }
+      }
+      // Fails soft either way — an unknown/already-ended session id is
+      // not an error the caller (often a best-effort sendBeacon with
+      // nothing listening for the response) needs to know about.
+      res.status(200).json({ success: true });
       return;
     }
 
@@ -216,8 +275,8 @@ module.exports = async (req, res) => {
         };
         await upstash(url, token, ['SET', key, JSON.stringify(record)]);
         await upstash(url, token, ['SADD', INDEX_KEY, name.toLowerCase()]);
-        await logLogin(url, token, record.displayName, true);
-        res.status(200).json({ success: true, isNewAccount: true, displayName: record.displayName });
+        const sessionId = await startSession(url, token, record.displayName, true);
+        res.status(200).json({ success: true, isNewAccount: true, displayName: record.displayName, sessionId });
         return;
       }
 
@@ -226,13 +285,14 @@ module.exports = async (req, res) => {
         res.status(401).json({ error: 'wrong-password' });
         return;
       }
-      await logLogin(url, token, record.displayName, false);
+      const sessionId = await startSession(url, token, record.displayName, false);
       res.status(200).json({
         success: true,
         isNewAccount: false,
         displayName: record.displayName,
         profile: record.profile || null,
-        progress: record.progress || null
+        progress: record.progress || null,
+        sessionId
       });
       return;
     }

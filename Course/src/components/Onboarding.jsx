@@ -60,7 +60,7 @@ export default function Onboarding({ onFinish }) {
       return;
     }
 
-    saveSession(cleanName, password);
+    saveSession(cleanName, password, result.data.sessionId);
     if (!result.data.isNewAccount && result.data.progress) {
       loadProgress(result.data.progress);
     }

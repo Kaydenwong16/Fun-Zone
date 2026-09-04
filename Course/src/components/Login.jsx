@@ -40,7 +40,7 @@ export default function Login({ onFinish, onNewStudent }) {
       return;
     }
 
-    saveSession(cleanName, password);
+    saveSession(cleanName, password, result.data.sessionId);
     if (result.data.progress) loadProgress(result.data.progress);
     updateProfile({
       ...(result.data.profile || { name: cleanName }),
