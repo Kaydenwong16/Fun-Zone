@@ -11,6 +11,10 @@ const NAV_ITEMS = [
   { key: "roadmap", icon: "🗺️", label: "navRoadmap" },
   { key: "badges", icon: "🏅", label: "navBadges" },
   { key: "teacher", icon: "🤖", label: "navTeacher" },
+  // A standalone static page (course-outline.html), not a client-side
+  // route — opens in a new tab so a parent can browse it without losing
+  // whatever the student was doing in the app.
+  { key: "courseOutline", icon: "📋", label: "navCourseOutline", href: "course-outline.html" },
   { key: "parent", icon: "👪", label: "navParent" },
 ];
 
@@ -43,13 +47,8 @@ export default function Header({ route, onNavigate, onOpenSettings }) {
         <nav className={`main-nav ${menuOpen ? "is-open" : ""}`} aria-label="Main navigation">
           {NAV_ITEMS.map((item) => {
             const field = UI_STRINGS[item.label];
-            return (
-              <button
-                key={item.key}
-                type="button"
-                className={`main-nav-item ${route === item.key ? "is-active" : ""}`}
-                onClick={() => go(item.key)}
-              >
+            const content = (
+              <>
                 <span className="main-nav-icon" aria-hidden="true">
                   {item.icon}
                 </span>
@@ -57,6 +56,23 @@ export default function Header({ route, onNavigate, onOpenSettings }) {
                   {profile.language !== "zh" && <span className="en">{field.en}</span>}
                   {profile.language !== "en" && <span className="zh">{field.zh}</span>}
                 </span>
+              </>
+            );
+            if (item.href) {
+              return (
+                <a key={item.key} href={item.href} target="_blank" rel="noopener noreferrer" className="main-nav-item">
+                  {content}
+                </a>
+              );
+            }
+            return (
+              <button
+                key={item.key}
+                type="button"
+                className={`main-nav-item ${route === item.key ? "is-active" : ""}`}
+                onClick={() => go(item.key)}
+              >
+                {content}
               </button>
             );
           })}

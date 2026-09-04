@@ -11,6 +11,7 @@ export const UI_STRINGS = {
   navRoadmap: { en: "Roadmap", zh: "学习路线" },
   navBadges: { en: "Badges", zh: "徽章" },
   navTeacher: { en: "AI Teacher", zh: "AI老师" },
+  navCourseOutline: { en: "Course Outline", zh: "课程大纲" },
   navParent: { en: "Parents", zh: "家长" },
   settings: { en: "Settings", zh: "设置" },
   language: { en: "Language", zh: "语言" },
