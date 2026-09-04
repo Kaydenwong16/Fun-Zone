@@ -12,7 +12,7 @@ export const UI_STRINGS = {
   navBadges: { en: "Badges", zh: "徽章" },
   navTeacher: { en: "AI Teacher", zh: "AI老师" },
   navCourseOutline: { en: "Course Outline", zh: "课程大纲" },
-  navParent: { en: "Parents", zh: "家长" },
+  navParent: { en: "Dashboard", zh: "面板" },
   settings: { en: "Settings", zh: "设置" },
   language: { en: "Language", zh: "语言" },
   audio: { en: "Audio", zh: "音频" },
