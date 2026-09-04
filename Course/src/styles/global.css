@@ -606,8 +606,16 @@ code {
 }
 
 .header-avatar {
-  font-size: 18px;
+  font-size: 12px;
+  font-weight: 800;
   padding: 6px 10px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.header-avatar .zh {
+  font-family: var(--font-zh);
 }
 
 .nav-toggle {
