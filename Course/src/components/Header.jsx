@@ -73,7 +73,7 @@ export default function Header({ route, onNavigate, onOpenSettings }) {
             🔥 {progress.streak}
           </div>
           <button type="button" className="btn btn-ghost btn-sm header-avatar" onClick={onOpenSettings} aria-label="Settings">
-            {profile.avatar || "⚙️"}
+            ⚙️
           </button>
           <button
             type="button"
