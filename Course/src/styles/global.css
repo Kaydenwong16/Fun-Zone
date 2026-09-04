@@ -538,6 +538,12 @@ code {
   flex: 1;
   overflow-x: auto;
   scrollbar-width: none;
+  /* If it ever still doesn't fit (very narrow "desktop" window), fade the
+     trailing edge instead of hard-clipping the last item mid-word — a
+     visual cue that there's more to scroll to. Harmless when everything
+     already fits, since there's nothing under the fade to notice. */
+  mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
 }
 
 .main-nav::-webkit-scrollbar {
@@ -547,15 +553,16 @@ code {
 .main-nav-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 7px 9px;
+  padding: 7px 7px;
   border-radius: var(--radius-s);
   font-weight: 700;
   color: var(--ink-soft);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .main-nav-icon {
@@ -642,7 +649,7 @@ code {
   padding: 28px 24px 64px;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1220px) {
   .main-nav {
     position: absolute;
     top: 100%;
@@ -654,6 +661,8 @@ code {
     box-shadow: var(--shadow-m);
     display: none;
     padding: 8px;
+    mask-image: none;
+    -webkit-mask-image: none;
   }
   .main-nav.is-open {
     display: flex;
@@ -661,6 +670,9 @@ code {
   .nav-toggle {
     display: inline-flex;
   }
+}
+
+@media (max-width: 480px) {
   .header-stat-streak {
     display: none;
   }

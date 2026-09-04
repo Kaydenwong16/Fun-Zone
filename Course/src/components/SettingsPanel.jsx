@@ -17,6 +17,8 @@ export default function SettingsPanel({ onClose }) {
   const { t, language, setLanguage, profile, updateProfile } = useLanguage();
   const { progress, reset } = useProgress();
   const [confirmReset, setConfirmReset] = useState(false);
+  const [resetPassword, setResetPassword] = useState("");
+  const [resetError, setResetError] = useState("");
   const [resetBusy, setResetBusy] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const [session, setSession] = useState(() => getSession());
@@ -25,12 +27,28 @@ export default function SettingsPanel({ onClose }) {
   const [linkError, setLinkError] = useState("");
 
   const doReset = async () => {
+    setResetError("");
+    // If this profile is linked to a cloud account, require its actual
+    // password before wiping everything — a deliberate extra step so a
+    // reset can't happen from a stray/accidental tap, and so it isn't one
+    // tap away for anyone using a device a student is still logged into.
+    if (session && resetPassword !== session.password) {
+      setResetError(t({ en: "Incorrect password.", zh: "密码不正确。" }));
+      return;
+    }
     setResetBusy(true);
     await reset(); // also clears the cloud copy, if this profile is linked
     setResetBusy(false);
     setConfirmReset(false);
+    setResetPassword("");
     onClose?.();
     window.location.reload();
+  };
+
+  const cancelReset = () => {
+    setConfirmReset(false);
+    setResetPassword("");
+    setResetError("");
   };
 
   const doLink = async () => {
@@ -208,12 +226,30 @@ export default function SettingsPanel({ onClose }) {
           ) : (
             <div className="reset-confirm">
               <p>{t({ en: "This will erase all progress, XP, and badges. Are you sure?", zh: "这将清除所有进度、经验值和徽章。你确定吗？" })}</p>
-              <button type="button" className="btn btn-danger btn-sm" disabled={resetBusy} onClick={doReset}>
+              {session && (
+                <input
+                  className="name-input"
+                  type="password"
+                  value={resetPassword}
+                  onChange={(e) => setResetPassword(e.target.value)}
+                  placeholder={t({ en: "Enter your password to confirm", zh: "输入密码以确认" })}
+                  style={{ marginBottom: 4 }}
+                  autoFocus
+                  onKeyDown={(e) => e.key === "Enter" && doReset()}
+                />
+              )}
+              {resetError && <p className="auth-error">{resetError}</p>}
+              <button
+                type="button"
+                className="btn btn-danger btn-sm"
+                disabled={resetBusy || (!!session && !resetPassword)}
+                onClick={doReset}
+              >
                 {resetBusy
                   ? t({ en: "Resetting…", zh: "重置中…" })
                   : t({ en: "Yes, reset everything", zh: "是的，全部重置" })}
               </button>
-              <button type="button" className="btn btn-ghost btn-sm" disabled={resetBusy} onClick={() => setConfirmReset(false)}>
+              <button type="button" className="btn btn-ghost btn-sm" disabled={resetBusy} onClick={cancelReset}>
                 {t({ en: "Cancel", zh: "取消" })}
               </button>
             </div>
