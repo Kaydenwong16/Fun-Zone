@@ -532,10 +532,24 @@ code {
   font-size: 26px;
 }
 
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  text-align: left;
+}
+
 .brand-text .en {
   font-weight: 800;
   font-size: 17px;
   color: var(--ink);
+}
+
+.brand-text .zh {
+  font-family: var(--font-zh);
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--ink-soft);
 }
 
 .main-nav {

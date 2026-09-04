@@ -91,7 +91,8 @@ export default function Header({ route, onNavigate, onOpenSettings }) {
         <button type="button" className="brand" ref={brandRef} onClick={() => go("home")} aria-label="AI Builder Kids — Home">
           <span className="brand-mark">🤖</span>
           <span className="brand-text">
-            <span className="en">AI Builder Kids</span>
+            {profile.language !== "zh" && <span className="en">AI Builder Kids</span>}
+            {profile.language !== "en" && <span className="zh">儿童AI课程</span>}
           </span>
         </button>
 

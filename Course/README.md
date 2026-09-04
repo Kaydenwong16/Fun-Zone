@@ -1,4 +1,4 @@
-# AI Builder Kids 🤖✨
+# AI Builder Kids 儿童AI课程 🤖✨
 
 A 12-week, bilingual (English / 简体中文) interactive web app that teaches a kid
 to think like a builder who uses AI as a tool: **Learn → Try → Break → Ask AI
