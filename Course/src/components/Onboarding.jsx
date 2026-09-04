@@ -84,9 +84,9 @@ export default function Onboarding({ onFinish }) {
               <span className="zh">欢迎，小小建造者！</span>
             </h1>
             <p className="onboarding-text">
-              You're about to spend 90 days learning how to use AI and build things with it.
+              Over the next 12 weeks, you'll learn how to use AI and build things with it — one lesson day per week.
               <br />
-              <span className="zh">接下来的90天，你将学习如何使用AI，并用AI创造真正的作品。</span>
+              <span className="zh">接下来的12周，你将学习如何使用AI，并用AI创造真正的作品——每周一个学习日。</span>
             </p>
             <button type="button" className="btn btn-primary" onClick={() => setStep(1)}>
               START BUILDING · 开始创造

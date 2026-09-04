@@ -1,8 +1,10 @@
 # AI Builder Kids 🤖✨
 
-A 90-day, bilingual (English / 简体中文) interactive web app that teaches a kid
+A 12-week, bilingual (English / 简体中文) interactive web app that teaches a kid
 to think like a builder who uses AI as a tool: **Learn → Try → Break → Ask AI
-→ Fix → Build → Explain.**
+→ Fix → Build → Explain.** Each week is one day-lesson — a family sits down
+once a week and works through that week's lessons + its one mission in a
+single sitting (see `data/weeks.js`).
 
 Version 1 ran entirely client-side with `localStorage` for progress. It now
 also supports real per-student accounts (name + password) so progress
@@ -16,11 +18,11 @@ follows a student to any device — see "Accounts & the teacher view" below.
   diagram, explanation, audio, hands-on interaction, quiz, challenge); Weeks
   3–12 have real (not placeholder) lesson content drawn from the spec's
   per-week curriculum, each with its own diagram, quiz and challenge
-- **Missions** — a themed daily mission for all 90 days, grouped by week, with
-  a bigger Mission/Project on each week's final day
+- **Missions** — one mission per week/day (12 total): each week's biggest
+  hands-on Mission or Project
 - **Coding Lab** — live HTML/CSS/JS editor with a sandboxed preview iframe,
   Run/Reset, and a rule-based "Ask AI for Help" button
-- **Roadmap** — the 90-day path across 3 levels (AI Explorer → Code Builder →
+- **Roadmap** — the 12-week path across 3 levels (AI Explorer → Code Builder →
   AI Builder), lesson-by-lesson progress dots
 - **Badges** — 10 unlockable badges tied to real progress milestones
 - **AI Teacher** — a local, rule-based practice chatbot (keyword-matched

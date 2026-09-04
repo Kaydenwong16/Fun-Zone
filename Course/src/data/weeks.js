@@ -1,6 +1,9 @@
 // Week/day scaffolding shared across curriculum, missions, roadmap and badges.
-// Weeks 1–11 run 7 days each (days 1–77). Week 12 — the Final Project — runs
-// longer (days 78–90) to give room for its 9-step build/test/explain process.
+// Each week IS one day-lesson: a family sits down once a week and works
+// through that week's whole lesson set + its one mission in a single
+// sitting, so "day" and "week" are the same number (1–12) everywhere in
+// the app — dayRangeForWeek/weekForDay just keep that mapping in one place
+// so callers don't need to know it's 1:1.
 
 export const WEEKS = [
   { number: 1, level: 1, title: { en: "What Is AI?", zh: "什么是人工智能？" } },
@@ -24,18 +27,15 @@ export const LEVELS = [
 ];
 
 export function dayRangeForWeek(weekNumber) {
-  if (weekNumber === 12) return { start: 78, end: 90 };
-  const start = (weekNumber - 1) * 7 + 1;
-  return { start, end: start + 6 };
+  return { start: weekNumber, end: weekNumber };
 }
 
 export function weekForDay(day) {
-  if (day >= 78) return 12;
-  return Math.min(11, Math.ceil(day / 7));
+  return Math.min(12, Math.max(1, day));
 }
 
 export function levelForWeek(weekNumber) {
   return LEVELS.find((l) => l.weeks.includes(weekNumber))?.number ?? 1;
 }
 
-export const TOTAL_DAYS = 90;
+export const TOTAL_DAYS = 12;

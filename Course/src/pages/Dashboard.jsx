@@ -119,7 +119,7 @@ export default function Dashboard({ onNavigate, onOpenLesson }) {
       </div>
 
       <div className="dash-roadmap-teaser card card-pad">
-        <h3>🗺️ {t({ en: "90-Day Roadmap", zh: "90天学习路线" })}</h3>
+        <h3>🗺️ {t({ en: "12-Week Roadmap", zh: "12周学习路线" })}</h3>
         <p className="dash-mission-desc">
           {t({ en: `Level ${levelInfo?.number}: `, zh: `等级 ${levelInfo?.number}：` })}
           {t(levelInfo?.name)}
