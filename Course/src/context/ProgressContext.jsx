@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { getProgress, saveProgress, resetAll, getSession } from "../utils/storage.js";
+import { getProgress, saveProgress, resetAll, getSession, DEFAULT_PROGRESS } from "../utils/storage.js";
 import { syncAccount } from "../utils/account.js";
 import {
   addXP,
@@ -126,7 +126,17 @@ export function ProgressProvider({ children }) {
     setProgress((prev) => ({ ...prev, currentDay: Math.max(prev.currentDay, day) }));
   }, []);
 
-  const reset = useCallback(() => {
+  const reset = useCallback(async () => {
+    // Clear the cloud copy first (while we still have the session's
+    // credentials) — otherwise resetting only wipes this device, and
+    // logging back into the same account pulls the old progress right
+    // back down from the server.
+    // syncAccount fails soft (never rejects) if the server is unreachable —
+    // reset proceeds locally regardless either way.
+    const session = getSession();
+    if (session) {
+      await syncAccount({ name: session.name, password: session.password, progress: DEFAULT_PROGRESS });
+    }
     resetAll();
     setProgress(getProgress());
   }, []);
