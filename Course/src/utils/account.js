@@ -41,3 +41,8 @@ export function syncAccount({ name, password, profile, progress }) {
 export function fetchClassProgress(teacherPassword) {
   return call({ action: "teacherList", teacherPassword });
 }
+
+/** Teacher-only: fetches the login history log (newest first). */
+export function fetchLoginLog(teacherPassword, limit) {
+  return call({ action: "teacherLoginLog", teacherPassword, limit });
+}

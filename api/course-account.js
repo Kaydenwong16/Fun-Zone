@@ -9,6 +9,8 @@ const crypto = require('crypto');
 
 const KEY_PREFIX = 'courseAccount:';
 const INDEX_KEY = 'courseAccountIndex';
+const LOGIN_LOG_KEY = 'courseLoginLog';
+const MAX_LOGIN_LOG_ENTRIES = 1000;
 const MIN_PASSWORD_LEN = 4;
 const MAX_NAME_LEN = 24;
 
@@ -62,6 +64,16 @@ function hashPassword(password, salt) {
 
 function accountKey(name) {
   return KEY_PREFIX + name.trim().toLowerCase();
+}
+
+// Appends one login event (newest first) to a capped list — a running
+// history the teacher can review, distinct from each student's own
+// record (which only ever holds their *current* progress, not a log of
+// when they logged in).
+async function logLogin(url, token, displayName, isNewAccount) {
+  const entry = JSON.stringify({ name: displayName, at: new Date().toISOString(), isNewAccount });
+  await upstash(url, token, ['LPUSH', LOGIN_LOG_KEY, entry]);
+  await upstash(url, token, ['LTRIM', LOGIN_LOG_KEY, 0, MAX_LOGIN_LOG_ENTRIES - 1]);
 }
 
 function timingSafeStringEqual(a, b) {
@@ -143,6 +155,31 @@ module.exports = async (req, res) => {
       return;
     }
 
+    if (action === 'teacherLoginLog') {
+      const teacherPassword = process.env.TEACHER_PASSWORD;
+      if (!teacherPassword) {
+        res.status(500).json({ error: 'teacher-not-configured' });
+        return;
+      }
+      if (!timingSafeStringEqual(String(body.teacherPassword || ''), teacherPassword)) {
+        res.status(401).json({ error: 'wrong-teacher-password' });
+        return;
+      }
+      const limit = Math.min(500, Math.max(1, Number(body.limit) || 200));
+      const raws = (await upstash(url, token, ['LRANGE', LOGIN_LOG_KEY, 0, limit - 1])) || [];
+      const logins = raws
+        .map((raw) => {
+          try {
+            return JSON.parse(raw);
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean);
+      res.status(200).json({ success: true, logins });
+      return;
+    }
+
     const name = String(body.name || '').trim().slice(0, MAX_NAME_LEN);
     const password = String(body.password || '');
     if (!name) {
@@ -179,6 +216,7 @@ module.exports = async (req, res) => {
         };
         await upstash(url, token, ['SET', key, JSON.stringify(record)]);
         await upstash(url, token, ['SADD', INDEX_KEY, name.toLowerCase()]);
+        await logLogin(url, token, record.displayName, true);
         res.status(200).json({ success: true, isNewAccount: true, displayName: record.displayName });
         return;
       }
@@ -188,6 +226,7 @@ module.exports = async (req, res) => {
         res.status(401).json({ error: 'wrong-password' });
         return;
       }
+      await logLogin(url, token, record.displayName, false);
       res.status(200).json({
         success: true,
         isNewAccount: false,
