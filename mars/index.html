@@ -350,6 +350,23 @@ footer b{font-family:var(--display);font-weight:400;font-size:15px;color:var(--i
   .stage:has(#startScreen:not([hidden])){min-height:min(520px,44vh)}
   .dash{flex:1 1 auto;min-height:0;overflow:auto;scrollbar-width:thin;align-content:start;padding:0 7px 7px 0}
 }
+/* 游戏进行中：只留种植箱和控制台，其余收起 */
+body.playing .side,body.playing .burst,body.playing .credit{display:none}
+.stage-fit{display:contents}
+body.playing .layout{grid-template-columns:1fr}
+body.playing .top{width:100%}
+body.playing .home{margin-left:auto}
+@media (min-width:761px) and (min-height:600px){
+  body.playing{height:100vh;margin:0;display:flex;flex-direction:column;overflow:hidden;padding-bottom:14px}
+  body.playing .top{flex:none;margin-bottom:12px}
+  body.playing .layout{flex:1 1 auto;min-height:0;width:100%;grid-template-rows:minmax(0,1fr)}
+  body.playing .game{position:static;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,420px);align-items:start}
+  body.playing .console{align-self:stretch;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+  body.playing .toolbar,body.playing .hud{flex:none}
+  body.playing .stage-fit{display:flex;justify-content:center;align-items:flex-start;flex:1 1 auto;min-height:0;container-type:size}
+  body.playing .stage{width:min(100cqw,calc(100cqh * 900 / 620))}
+  body.playing .dash{height:100%;grid-template-columns:1fr}
+}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
@@ -501,6 +518,7 @@ footer b{font-family:var(--display);font-weight:400;font-size:15px;color:var(--i
         <div class="hud-item"><span class="hl">肥料袋 · 堆肥桶</span><b id="hBags">5 · 0%</b></div>
       </div>
 
+      <div class="stage-fit">
       <div class="stage" id="stage">
         <svg id="scene" viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="火星种植箱场景：防护罩下的上下两层种植箱">
           <defs>
@@ -690,6 +708,7 @@ footer b{font-family:var(--display);font-weight:400;font-size:15px;color:var(--i
             <p class="best" id="bestLine">还没有最好成绩，快来创造第一个纪录吧。</p>
           </div>
         </div>
+      </div>
       </div>
     </div>
 
@@ -1440,7 +1459,7 @@ function renderBanner(){
     b.innerHTML=`<svg><use href="#i-alert"/></svg><span>${EV[warn.type].name}预警 · 约 ${left.toFixed(1)} 火星小时后到达${warn.type!=='supply'&&warn.type!=='cold'?(S.boost?' · 防护罩已强化':' · 请打开强化防护罩'):''}</span>`}
   else b.hidden=true;
 }
-function render(){renderSky();renderDevices();renderPlants();renderHUD();renderMeters();renderBanner()}
+function render(){document.body.classList.toggle('playing',S.started&&!S.over);renderSky();renderDevices();renderPlants();renderHUD();renderMeters();renderBanner()}
 
 /* ================= log / toast / fx ================= */
 function log(txt,kind){
