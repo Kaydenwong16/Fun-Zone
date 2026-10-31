@@ -177,8 +177,10 @@ td.v{font-family:var(--num);font-variant-numeric:tabular-nums;white-space:nowrap
 
 /* dashboard: meters + controls */
 .dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px}
-.dash h3{font-size:20px;margin-bottom:10px;display:flex;align-items:baseline;gap:8px}
-.dash h3 small{font-family:var(--body);font-size:12px;color:var(--muted)}
+.dash h3,.meters-box h3{font-size:20px;margin-bottom:10px;display:flex;align-items:baseline;gap:8px}
+.dash h3 small,.meters-box h3 small{font-family:var(--body);font-size:12px;color:var(--muted)}
+.meters-box{margin-top:12px;padding-top:12px;border-top:1.5px dashed var(--line);min-width:0}
+body:not(.playing) .meters-box{display:none}
 .meters{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px 12px}
 .meter{min-width:0}
 .m-top{display:flex;align-items:baseline;gap:6px;font-size:12.5px}
@@ -356,16 +358,66 @@ body.playing .side,body.playing .burst,body.playing .credit{display:none}
 body.playing .layout{grid-template-columns:1fr}
 body.playing .top{width:100%}
 body.playing .home{margin-left:auto}
-@media (min-width:761px) and (min-height:600px){
+@media (min-width:761px) and (min-height:600px) and (orientation:landscape){
   body.playing{height:100vh;margin:0;display:flex;flex-direction:column;overflow:hidden;padding-bottom:14px}
   body.playing .top{flex:none;margin-bottom:12px}
   body.playing .layout{flex:1 1 auto;min-height:0;width:100%;grid-template-rows:minmax(0,1fr)}
   body.playing .game{position:static;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,420px);align-items:start}
   body.playing .console{align-self:stretch;min-height:0;display:flex;flex-direction:column;overflow:hidden}
   body.playing .toolbar,body.playing .hud{flex:none}
+  body.playing .play-area{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
   body.playing .stage-fit{display:flex;justify-content:center;align-items:flex-start;flex:1 1 auto;min-height:0;container-type:size}
+  body.playing .meters-box{flex:none}
+  body.playing .meters{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:4px 12px}
   body.playing .stage{width:min(100cqw,calc(100cqh * 900 / 620))}
   body.playing .dash{height:100%;grid-template-columns:1fr}
+}
+/* 桌面：仪表放在种植箱右边一列 */
+@media (min-width:1181px) and (min-height:600px) and (orientation:landscape){
+  body.playing .play-area{flex-direction:row;gap:14px}
+  body.playing .meters-box{width:300px;margin-top:0;padding-top:0;padding-left:14px;border-top:0;border-left:1.5px dashed var(--line);overflow:auto;scrollbar-width:thin}
+  body.playing .meters{grid-template-columns:1fr 1fr}
+}
+/* 手机和竖屏：游戏中把抬头和读数压紧，种植箱更快出现 */
+@media (max-width:760px),(orientation:portrait){
+  body.playing .brand .sub{display:none}
+  body.playing .brand h1{font-size:26px}
+  body.playing .brand svg{width:36px;height:36px}
+  body.playing .top{flex-wrap:nowrap;margin-bottom:10px}
+  body.playing .home{padding:7px 12px;font-size:14px}
+}
+@media (max-width:760px){
+  body.playing .hud{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+  body.playing .hud-item{padding:3px 8px}
+  body.playing .hud-item .hl{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.playing .hud-item b{font-size:14px}
+  body.playing .hud-item.score{grid-column:1/-1}
+}
+/* 平板横屏：控制台窄一点，抬头、读数、仪表都压紧，给种植箱留出高度 */
+@media (min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape){
+  body.playing .game{grid-template-columns:minmax(0,1fr) 300px}
+  body.playing .brand .sub{display:none}
+  body.playing .brand h1{font-size:28px}
+  body.playing .brand svg{width:40px;height:40px}
+  body.playing .top{margin-bottom:8px}
+  body.playing .console{padding:10px}
+  body.playing .toolbar{margin-bottom:6px}
+  body.playing .hud{grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:5px;margin-bottom:8px}
+  body.playing .hud-item.score{grid-column:span 1}
+  body.playing .hud-item b{white-space:nowrap}
+  body.playing .hud-item .hl,body.playing .hud-item .hs{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.playing .dash h3 small{display:none}
+  body.playing .cg .row{grid-template-columns:1fr 1fr;gap:6px}
+  body.playing .ctl{padding:5px 7px}
+  body.playing .ctl .cc{font-size:10.5px}
+  body.playing .hud-item{padding:3px 8px}
+  body.playing .hud-item .hl{font-size:10px}
+  body.playing .hud-item b{font-size:14px}
+  body.playing .meters-box{margin-top:8px;padding-top:6px}
+  body.playing .meters-box h3{display:none}
+  body.playing .meters{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:2px 10px}
+  body.playing .m-top{font-size:11.5px}
+  body.playing .m-bar{height:7px}
 }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
@@ -518,6 +570,7 @@ body.playing .home{margin-left:auto}
         <div class="hud-item"><span class="hl">肥料袋 · 堆肥桶</span><b id="hBags">5 · 0%</b></div>
       </div>
 
+      <div class="play-area">
       <div class="stage-fit">
       <div class="stage" id="stage">
         <svg id="scene" viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="火星种植箱场景：防护罩下的上下两层种植箱">
@@ -710,6 +763,11 @@ body.playing .home{margin-left:auto}
         </div>
       </div>
       </div>
+      <div class="meters-box" id="metersPanel">
+        <h3>种植箱仪表 <small>浅绿色区域 = 刚刚好</small></h3>
+        <div class="meters" id="meters"></div>
+      </div>
+      </div>
     </div>
 
     <div class="dash">
@@ -758,10 +816,8 @@ body.playing .home{margin-left:auto}
         </div>
       </div>
 
-      <div class="panel" id="metersPanel">
-        <h3>种植箱仪表 <small>浅绿色区域 = 刚刚好</small></h3>
-        <div class="meters" id="meters"></div>
-        <div class="logbox" style="margin-top:16px">
+      <div class="panel" id="logPanel">
+        <div class="logbox">
           <h3>任务日志 <small>飞船电脑会在这里提醒你</small></h3>
           <ol id="log"></ol>
         </div>
@@ -1116,7 +1172,7 @@ function simStep(dt){
     if(S.inT<19) S.autoState='heat'; else if(S.inT>25) S.autoState='cool';
     if(S.autoState==='heat'){hv=5;hvUse=3.75} else if(S.autoState==='cool'){hv=-5;hvUse=3.75}
   }
-  const charge=sun/100*16*d.charge;
+  const charge=sun/100*32*d.charge;
   const use=(S.lampU?2:0)+(S.lampL?3:0)+hvUse+(S.boost?5:0);
   S.energy=clamp(S.energy+(charge-use)*dt,0,100);
   if(S.energy<=0&&(S.lampU||S.lampL||S.boost||S.hvac!=='off')){
