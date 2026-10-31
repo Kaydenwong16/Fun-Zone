@@ -10,14 +10,14 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Kayden's Fun Zone">
 <meta property="og:description" content="Watch fun videos, play the Fighter Jet game, and learn to build with AI.">
-<meta property="og:image" content="https://fun-zone-theta.vercel.app/photo/dragon-og.jpg">
+<meta property="og:image" content="https://fun-zone-kaydenwong16-2969s-projects.vercel.app/photo/dragon-og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="674">
-<meta property="og:url" content="https://fun-zone-theta.vercel.app/">
+<meta property="og:url" content="https://fun-zone-kaydenwong16-2969s-projects.vercel.app/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Kayden's Fun Zone">
 <meta name="twitter:description" content="Watch fun videos, play the Fighter Jet game, and learn to build with AI.">
-<meta name="twitter:image" content="https://fun-zone-theta.vercel.app/photo/dragon-og.jpg">
+<meta name="twitter:image" content="https://fun-zone-kaydenwong16-2969s-projects.vercel.app/photo/dragon-og.jpg">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
@@ -282,6 +282,23 @@
     0%, 100% { box-shadow: 0 10px 0 #2a1660, 0 16px 24px rgba(0,0,0,0.5), 0 0 0 rgba(179,136,255,0.65); }
     50% { box-shadow: 0 10px 0 #2a1660, 0 16px 24px rgba(0,0,0,0.5), 0 0 28px rgba(179,136,255,0.65); }
   }
+  #marsButton {
+    background: linear-gradient(180deg, #f4743b, #b23a15);
+    box-shadow: 0 10px 0 #6e200a, 0 16px 24px rgba(0,0,0,0.5);
+    animation: pulseMars 2.2s infinite;
+  }
+  #marsButton:active {
+    transform: translateY(6px);
+    box-shadow: 0 4px 0 #6e200a, 0 8px 14px rgba(0,0,0,0.5);
+  }
+  #marsEmoji {
+    font-size: clamp(52px, 12vw, 68px);
+    line-height: 1;
+  }
+  @keyframes pulseMars {
+    0%, 100% { box-shadow: 0 10px 0 #6e200a, 0 16px 24px rgba(0,0,0,0.5), 0 0 0 rgba(255,138,80,0.65); }
+    50% { box-shadow: 0 10px 0 #6e200a, 0 16px 24px rgba(0,0,0,0.5), 0 0 28px rgba(255,138,80,0.65); }
+  }
   #jetButton {
     background: linear-gradient(180deg, #1e88e5, #0d47a1);
     box-shadow: 0 10px 0 #082a5e, 0 16px 24px rgba(0,0,0,0.5);
@@ -329,6 +346,13 @@
         <span>AI Builder Kids<span class="zh-sub">儿童AI课程</span><span class="credit">（Claude）</span></span>
       </a>
       <p class="sub">Learn to build and code with AI!<span class="zh-sub">和AI一起学习编程、动手创造！</span></p>
+    </div>
+    <div class="ctaCard">
+      <a class="ctaButton" id="marsButton" href="/mars/">
+        <span id="marsEmoji">🌱</span>
+        <span>Mars Planting Box<span class="zh-sub">火星种植箱</span><span class="credit">（黄奕海 设计）</span></span>
+      </a>
+      <p class="sub">Grow veggies on Mars and learn space science!<span class="zh-sub">在火星种菜，学习太空科学！</span></p>
     </div>
     <div class="ctaCard">
       <a class="ctaButton" id="jetButton" href="/game/">
