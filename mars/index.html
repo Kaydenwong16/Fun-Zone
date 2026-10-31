@@ -259,6 +259,8 @@ body:not(.playing) .meters-box{display:none}
 .stars-rule{display:flex;flex-direction:column;gap:4px;font-size:13.5px}
 .stars-rule span{color:var(--sun);letter-spacing:2px}
 
+/* 还没开声音时的提示 */
+.music-hint{position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:16px;z-index:40;border:2px solid var(--ink);border-radius:99px;background:var(--paper);color:var(--ink);padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:3px 3px 0 var(--shadow);animation:floatBtn 2s ease-in-out infinite}
 footer{max-width:1640px;margin:22px auto 0;text-align:center;font-size:12.5px;color:var(--muted)}
 footer b{font-family:var(--display);font-weight:400;font-size:15px;color:var(--ink)}
 
@@ -979,6 +981,7 @@ body.playing .home{margin-left:auto}
   </aside>
 </main>
 
+<button class="music-hint" id="musicHint" type="button">🎵 点一下任意地方开启音乐</button>
 <footer>
   <b>火星种植箱</b> · 创意与原稿设计：<b>黄奕海</b> · 游戏程序制作：<b>大聖爸</b> · 创作日期：2026年10月30日
 </footer>
@@ -1747,7 +1750,7 @@ function sfx(kind){
     o.connect(g).connect(audio.destination);o.start(t);o.stop(t+d+.03);t+=d*.92}
 }
 
-/* background music: 轻柔的太空小曲，游戏进行中（或教程中）播放，暂停/静音/结束时淡出 */
+/* background music: 轻柔的太空小曲。浏览器不允许打开网页就出声，所以第一次点击/按键后开始播放；静音或切到别的标签页时淡出 */
 const MUSIC={bpm:84,chords:[[262,330,392,523],[220,262,330,440],[175,220,262,349],[196,247,294,392]],arp:[0,1,2,3,2,1,2,1],master:null,next:0,step:0,on:false};
 function musicNote(f,t,dur,type,vol){
   const o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.value=f;
@@ -1755,7 +1758,8 @@ function musicNote(f,t,dur,type,vol){
   o.connect(g).connect(MUSIC.master);o.start(t);o.stop(t+dur+.05);
 }
 function musicTick(){
-  const want=!muted&&!!S&&S.started&&!S.over&&(!S.paused||!!tour)&&!document.hidden;
+  const want=!muted&&!document.hidden;
+  const hint=$('musicHint'); if(hint) hint.hidden=muted||(!!audio&&audio.state==='running');
   if(!audio) return;
   const now=audio.currentTime;
   if(!MUSIC.master){MUSIC.master=audio.createGain();MUSIC.master.gain.value=0;MUSIC.master.connect(audio.destination)}
@@ -1772,7 +1776,17 @@ function musicTick(){
     MUSIC.step++;MUSIC.next+=e;
   }
 }
-function unlockAudio(){try{if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume()}catch(e){}}
+function unlockAudio(){
+  try{
+    if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();
+    if(audio.state!=='running'){
+      audio.resume().catch(()=>{});
+      // Safari 需要在点击时真的播一个声音（这里是一段静音）才会解锁
+      const b=audio.createBuffer(1,1,22050),src=audio.createBufferSource();src.buffer=b;src.connect(audio.destination);src.start(0);
+    }
+  }catch(e){}
+  musicTick();
+}
 /* Safari 只在 click/touchend/keydown 时允许开声音，所以几个事件都监听 */
 for(const ev of ['pointerdown','click','touchend','keydown']) addEventListener(ev,unlockAudio,{capture:true});
 setInterval(musicTick,100);
