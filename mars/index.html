@@ -367,42 +367,6 @@ body.playing .home{margin-left:auto}
   body.playing .stage{width:min(100cqw,calc(100cqh * 900 / 620))}
   body.playing .dash{height:100%;grid-template-columns:1fr}
 }
-/* 桌面：控制台 | 仪表+日志 两列并排，一屏都能看到 */
-@media (min-width:1181px) and (min-height:600px) and (orientation:landscape){
-  body.playing .game{grid-template-columns:minmax(0,1fr) minmax(0,760px)}
-  body.playing .dash{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr);overflow:hidden;align-items:stretch}
-  body.playing #controls,body.playing #metersPanel{min-height:0;overflow:auto;scrollbar-width:thin}
-  body.playing #metersPanel{display:flex;flex-direction:column}
-  body.playing .meters{grid-template-columns:1fr 1fr;gap:4px 12px}
-  body.playing #metersPanel .logbox{flex:1 1 auto;min-height:120px;display:flex;flex-direction:column}
-  body.playing #metersPanel .logbox ol{max-height:none;flex:1 1 0;min-height:0}
-}
-/* 矮一点的笔记本屏幕：抬头、读数、控制台都压紧 */
-@media (min-width:1181px) and (min-height:600px) and (max-height:900px) and (orientation:landscape){
-  body.playing .brand .sub{display:none}
-  body.playing .brand h1{font-size:28px}
-  body.playing .brand svg{width:40px;height:40px}
-  body.playing .top{margin-bottom:8px}
-  body.playing .console{padding:10px}
-  body.playing .toolbar{margin-bottom:6px}
-  body.playing .hud{grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:5px;margin-bottom:8px}
-  body.playing .hud-item{padding:3px 8px}
-  body.playing .hud-item.score{grid-column:span 1}
-  body.playing .hud-item .hl{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  body.playing .hud-item b{font-size:14px}
-  body.playing .dash .panel{padding:10px 12px}
-  body.playing .dash h3{font-size:17px;margin-bottom:4px}
-  body.playing .dash h3 small{display:none}
-  body.playing .ctl-groups{gap:5px}
-  body.playing .cg h4{font-size:11px;margin-bottom:2px}
-  body.playing .cg .row{gap:5px}
-  body.playing .ctl{padding:3px 7px}
-  body.playing .ctl svg.ic{width:20px;height:20px}
-  body.playing .ctl .cc{font-size:10.5px}
-  body.playing .seg button{padding:3px 4px}
-  body.playing .seg-label{display:none}
-  body.playing .meters{gap:2px 12px}
-}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
