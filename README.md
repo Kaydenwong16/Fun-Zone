@@ -9,7 +9,7 @@ hero video, linking to two things: Kayden's Jet Battle, a browser-based fighter 
 The root `vercel.json` rewrites `/` to `Website/index.html`; `/game/` and `/course-app/` are
 served automatically as static folders.
 
-Live at **https://fun-zone-theta.vercel.app**. This repo (`Kaydenwong16/Fun-Zone`) is the
+Live at **https://fun-zone-kaydenwong16-2969s-projects.vercel.app**. This repo (`Kaydenwong16/Fun-Zone`) is the
 primary one — it started as a copy of the original `Kaydenwong16/Fighter-Jet` repo (same
 history, same code), which still exists but is no longer the one being deployed to.
 
