@@ -340,6 +340,14 @@ footer b{font-family:var(--display);font-weight:400;font-size:15px;color:var(--i
   .hud-item.score{grid-column:1/-1}
   .tour-bubble{grid-template-columns:44px 1fr}
 }
+/* 种植箱场景固定在上方，控制台和仪表在下面单独上下滚动 */
+@media (min-width:761px) and (min-height:600px){
+  .game{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);height:calc(100vh - 28px)}
+  .console{flex:none}
+  .stage{width:min(100%,calc(44vh * 900 / 620));margin-inline:auto}
+  .stage:has(#startScreen:not([hidden])){min-height:min(520px,44vh)}
+  .dash{flex:1 1 auto;min-height:0;overflow:auto;scrollbar-width:thin;align-content:start;padding:0 7px 7px 0}
+}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
@@ -1618,6 +1626,34 @@ function sfx(kind){
     g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(type==='square'||type==='sawtooth'?.05:.12,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);
     o.connect(g).connect(audio.destination);o.start(t);o.stop(t+d+.03);t+=d*.92}
 }
+
+/* background music: 轻柔的太空小曲，游戏进行中（或教程中）播放，暂停/静音/结束时淡出 */
+const MUSIC={bpm:84,chords:[[262,330,392,523],[220,262,330,440],[175,220,262,349],[196,247,294,392]],arp:[0,1,2,3,2,1,2,1],master:null,next:0,step:0,on:false};
+function musicNote(f,t,dur,type,vol){
+  const o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.value=f;
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g).connect(MUSIC.master);o.start(t);o.stop(t+dur+.05);
+}
+function musicTick(){
+  const want=!muted&&!!S&&S.started&&!S.over&&(!S.paused||!!tour)&&!document.hidden;
+  if(!audio) return;
+  const now=audio.currentTime;
+  if(!MUSIC.master){MUSIC.master=audio.createGain();MUSIC.master.gain.value=0;MUSIC.master.connect(audio.destination)}
+  if(want!==MUSIC.on){MUSIC.on=want;MUSIC.master.gain.cancelScheduledValues(now);MUSIC.master.gain.setTargetAtTime(want?.55:0,now,.35)}
+  if(!want) return;
+  if(MUSIC.next<now) MUSIC.next=now+.05;
+  const e=60/MUSIC.bpm/2;
+  while(MUSIC.next<now+.4){
+    const s=MUSIC.step, ch=MUSIC.chords[Math.floor(s/8)%4], t=MUSIC.next;
+    musicNote(ch[MUSIC.arp[s%8]],t,e*1.8,'triangle',.05);
+    if(s%8===0) musicNote(ch[0]/2,t,e*8,'sine',.07);
+    if(s%16===12) musicNote(ch[3]*2,t,e*3,'sine',.025);
+    MUSIC.step++;MUSIC.next+=e;
+  }
+}
+function unlockAudio(){try{if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume()}catch(e){}}
+addEventListener('pointerdown',unlockAudio);addEventListener('keydown',unlockAudio);
+setInterval(musicTick,100);
 
 /* ================= build scene ================= */
 function tag(parent,x,y,text,opt){
