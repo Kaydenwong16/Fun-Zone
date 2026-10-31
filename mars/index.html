@@ -1752,20 +1752,22 @@ function musicTick(){
   if(!audio) return;
   const now=audio.currentTime;
   if(!MUSIC.master){MUSIC.master=audio.createGain();MUSIC.master.gain.value=0;MUSIC.master.connect(audio.destination)}
-  if(want!==MUSIC.on){MUSIC.on=want;MUSIC.master.gain.cancelScheduledValues(now);MUSIC.master.gain.setTargetAtTime(want?.55:0,now,.35)}
+  if(want!==MUSIC.on){MUSIC.on=want;MUSIC.master.gain.cancelScheduledValues(now);MUSIC.master.gain.setTargetAtTime(want?.8:0,now,.35)}
+  if(want&&audio.state==='suspended') audio.resume().catch(()=>{});
   if(!want) return;
   if(MUSIC.next<now) MUSIC.next=now+.05;
   const e=60/MUSIC.bpm/2;
   while(MUSIC.next<now+.4){
     const s=MUSIC.step, ch=MUSIC.chords[Math.floor(s/8)%4], t=MUSIC.next;
-    musicNote(ch[MUSIC.arp[s%8]],t,e*1.8,'triangle',.05);
-    if(s%8===0) musicNote(ch[0]/2,t,e*8,'sine',.07);
-    if(s%16===12) musicNote(ch[3]*2,t,e*3,'sine',.025);
+    musicNote(ch[MUSIC.arp[s%8]]*2,t,e*1.6,'triangle',.1);
+    if(s%8===0) musicNote(ch[0],t,e*8,'triangle',.07);
+    if(s%16===12) musicNote(ch[3]*4,t,e*3,'sine',.04);
     MUSIC.step++;MUSIC.next+=e;
   }
 }
 function unlockAudio(){try{if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume()}catch(e){}}
-addEventListener('pointerdown',unlockAudio);addEventListener('keydown',unlockAudio);
+/* Safari 只在 click/touchend/keydown 时允许开声音，所以几个事件都监听 */
+for(const ev of ['pointerdown','click','touchend','keydown']) addEventListener(ev,unlockAudio,{capture:true});
 setInterval(musicTick,100);
 
 /* ================= build scene ================= */
