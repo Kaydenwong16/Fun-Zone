@@ -344,13 +344,9 @@ footer b{font-family:var(--display);font-weight:400;font-size:15px;color:var(--i
   .hud-item.score{grid-column:1/-1}
   .tour-bubble{grid-template-columns:44px 1fr}
 }
-/* 种植箱场景固定在上方，控制台和仪表在下面单独上下滚动 */
-@media (min-width:761px) and (min-height:600px){
-  .game{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);height:calc(100vh - 28px)}
-  .console{flex:none}
-  .stage{width:min(100%,calc(44vh * 900 / 620));margin-inline:auto}
-  .stage:has(#startScreen:not([hidden])){min-height:min(520px,44vh)}
-  .dash{flex:1 1 auto;min-height:0;overflow:auto;scrollbar-width:thin;align-content:start;padding:0 7px 7px 0}
+/* 中间一栏和左右两栏一样：固定在屏幕里，整栏自己上下滚动 */
+@media (min-width:1181px){
+  .game{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);max-height:calc(100vh - 28px);overflow:auto;scrollbar-width:thin;padding:0 7px 7px 0}
 }
 /* 游戏进行中：只留种植箱和控制台，其余收起 */
 body.playing .side,body.playing .burst,body.playing .credit{display:none}
@@ -362,7 +358,7 @@ body.playing .home{margin-left:auto}
   body.playing{height:100vh;margin:0;display:flex;flex-direction:column;overflow:hidden;padding-bottom:14px}
   body.playing .top{flex:none;margin-bottom:12px}
   body.playing .layout{flex:1 1 auto;min-height:0;width:100%;grid-template-rows:minmax(0,1fr)}
-  body.playing .game{position:static;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,420px);align-items:start}
+  body.playing .game{position:static;height:100%;max-height:none;overflow:visible;padding:0;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,420px);align-items:start}
   body.playing .console{align-self:stretch;min-height:0;display:flex;flex-direction:column;overflow:hidden}
   body.playing .toolbar,body.playing .hud{flex:none}
   body.playing .play-area{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
