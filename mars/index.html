@@ -180,6 +180,10 @@ td.v{font-family:var(--num);font-variant-numeric:tabular-nums;white-space:nowrap
 .start-card p{font-size:14px;color:var(--muted)}
 .field{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600}
 .field input{border:2px solid var(--ink);border-radius:10px;padding:8px 10px;font:inherit;font-weight:400;background:var(--paper-2);color:var(--ink)}
+/* 名字还没填：整个输入名字区块黄色闪烁，填了就停 */
+.field:has(#astroName:placeholder-shown){padding:8px 10px;margin:-8px -10px;border-radius:12px;color:#2A2216;animation:nameBlink 1.2s ease-in-out infinite}
+.field:has(#astroName:placeholder-shown) input{border-color:#2A2216}
+@keyframes nameBlink{0%,100%{background:#FFD43B;box-shadow:0 0 14px 3px rgba(255,212,59,.65)}50%{background:#FFF3B0;box-shadow:none}}
 .diff{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border:0;padding:0;margin:0}
 .diff legend{font-size:13px;font-weight:600;margin-bottom:4px;padding:0}
 .diff label{border:2px solid var(--line);border-radius:12px;padding:8px;cursor:pointer;display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--muted);background:var(--paper)}
@@ -187,13 +191,10 @@ td.v{font-family:var(--num);font-variant-numeric:tabular-nums;white-space:nowrap
 .diff input{position:absolute;opacity:0;pointer-events:none}
 .diff label:has(input:checked){border-color:var(--ink);background:var(--sun-soft);box-shadow:3px 3px 0 var(--shadow)}
 .diff label:has(input:focus-visible){outline:3px solid var(--focus)}
-/* 没填名字时：提示和锁住的难度/开始按钮一起黄色闪烁 */
-.start-card .name-need{font-size:13px;font-weight:600;color:#2A2216;margin:-4px 0 0;padding:6px 12px;border:2px solid #FFD43B;border-radius:10px;animation:lockHint 1.2s ease-in-out infinite}
-@keyframes lockHint{0%,100%{background:#FFD43B;box-shadow:0 0 12px 2px rgba(255,212,59,.6)}50%{background:#FFF3B0;box-shadow:none}}
-.diff:disabled{opacity:.7}
-.diff:disabled label,.start-actions .btn:disabled{cursor:not-allowed;animation:lockGlow 1.2s ease-in-out infinite}
-.start-actions .btn:disabled{opacity:.7;box-shadow:none}
-@keyframes lockGlow{0%,100%{border-color:#FFD43B;box-shadow:0 0 10px 1px rgba(255,212,59,.55)}50%{border-color:var(--line);box-shadow:none}}
+.name-need{font-size:13px;font-weight:600;color:var(--rust);margin:-4px 0 0}
+.diff:disabled{opacity:.4}
+.diff:disabled label{cursor:not-allowed}
+.start-actions .btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
 .start-actions{display:flex;flex-wrap:wrap;gap:10px}
 .btn{border:2px solid var(--ink);border-radius:12px;padding:10px 16px;cursor:pointer;background:var(--paper);font-weight:600;box-shadow:3px 3px 0 var(--shadow);transition:transform .08s,box-shadow .08s}
 .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--shadow)}
