@@ -201,6 +201,8 @@ td.v{font-family:var(--num);font-variant-numeric:tabular-nums;white-space:nowrap
 .btn.primary{background:var(--rust);color:#fff}
 .btn.green{background:var(--leaf);color:#fff}
 .best{font-size:12px;color:var(--muted)}
+.best-reset{border:1.5px solid var(--line);background:none;color:var(--muted);border-radius:8px;padding:0 8px;font-size:11.5px;cursor:pointer;margin-left:4px}
+.best-reset:hover{color:var(--ink);border-color:var(--ink)}
 
 /* dashboard: meters + controls */
 .dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px}
@@ -376,7 +378,13 @@ footer b{font-family:var(--display);font-weight:400;font-size:15px;color:var(--i
   .game{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);max-height:calc(100vh - 28px);overflow:auto;scrollbar-width:thin;padding:0 7px 7px 0}
 }
 /* 游戏进行中：只留种植箱和控制台，其余收起 */
-body.playing .side,body.playing .burst,body.playing .credit,body.playing .lb{display:none}
+body.playing .side,body.playing .burst,body.playing .credit{display:none}
+/* 游戏中排行榜留在抬头里，压成一行 */
+body.playing .lb{display:flex;align-items:center;gap:10px;min-width:0;padding:5px 12px}
+body.playing .lb-h{margin:0;white-space:nowrap}
+body.playing .lb ol{flex-direction:row;flex-wrap:wrap;gap:2px 14px}
+body.playing .lb li .lb-diff{display:none}
+body.playing .lb li .lb-score{margin-left:4px}
 .stage-fit{display:contents}
 body.playing .layout{grid-template-columns:1fr}
 body.playing .top{width:100%}
@@ -441,7 +449,9 @@ body.playing .home{margin-left:auto}
   body.playing .brand .sub{display:none}
   body.playing .brand h1{font-size:26px}
   body.playing .brand svg{width:36px;height:36px}
-  body.playing .top{flex-wrap:nowrap;margin-bottom:10px}
+  body.playing .top{flex-wrap:wrap;margin-bottom:10px}
+  body.playing .brand{flex:1 1 auto;min-width:0}
+  body.playing .lb{order:3;flex:1 1 100%}
   body.playing .home{padding:7px 12px;font-size:14px}
 }
 @media (max-width:760px){
@@ -821,7 +831,7 @@ body.playing .home{margin-left:auto}
               <button class="btn primary" id="startTour" type="button" disabled>跟着教程开始（推荐）</button>
               <button class="btn" id="startDirect" type="button" disabled>我会玩，直接开始</button>
             </div>
-            <p class="best" id="bestLine">还没有最好成绩，快来创造第一个纪录吧。</p>
+            <p class="best"><span id="bestLine">还没有最好成绩，快来创造第一个纪录吧。</span> <button class="best-reset" id="bestReset" type="button" hidden>重置</button></p>
           </div>
         </div>
       </div>
@@ -1668,9 +1678,11 @@ function renderCards(){
 }
 
 /* ================= mission flow ================= */
-function bestGet(){try{return JSON.parse(localStorage.getItem('marsbox-best')||'null')}catch(e){return null}}
-function bestSet(v){try{localStorage.setItem('marsbox-best',JSON.stringify(v))}catch(e){}}
-function showBest(){const b=bestGet();$('bestLine').textContent=b?`最好成绩：${b.name} · ${b.diff} · ${b.score} 分 · ${'★'.repeat(b.stars)}${'☆'.repeat(3-b.stars)}`:'还没有最好成绩，快来创造第一个纪录吧。'}
+// 2026-11-01 起换新的存储名，旧的「最好成绩」全部清零
+const BEST_KEY='marsbox-best-v2';
+function bestGet(){try{return JSON.parse(localStorage.getItem(BEST_KEY)||'null')}catch(e){return null}}
+function bestSet(v){try{if(v)localStorage.setItem(BEST_KEY,JSON.stringify(v));else localStorage.removeItem(BEST_KEY)}catch(e){}}
+function showBest(){const b=bestGet();$('bestReset').hidden=!b;$('bestLine').textContent=b?`最好成绩：${b.name} · ${b.diff} · ${b.score} 分 · ${'★'.repeat(b.stars)}${'☆'.repeat(3-b.stars)}`:'还没有最好成绩，快来创造第一个纪录吧。'}
 /* 先填名字，难度和开始按钮才解锁 */
 function nameGate(){
   const ok=!!($('astroName').value||'').trim();
@@ -1899,6 +1911,7 @@ function wire(){
   $('btnTour').addEventListener('click',()=>{if(!S.started){startMission(true)}else if(!tour)startTour()});
   $('rulesTour').addEventListener('click',()=>{if(!S.started){startMission(true)}else if(!tour)startTour()});
   $('btnNew').addEventListener('click',()=>{if(tour)endTour();S.paused=true;S.started=false;$('resModal').hidden=true;$('startScreen').hidden=false;$('astroName').value=S.name==='小宇航员'?'':S.name;nameGate();showBest();$('stage').scrollIntoView({behavior:'smooth',block:'center'})});
+  $('bestReset').addEventListener('click',()=>{if(confirm('确定要清除这台设备上的最好成绩吗？')){bestSet(null);showBest()}});
   $('astroName').addEventListener('input',nameGate);
   $('astroName').addEventListener('keydown',e=>{if(e.key==='Enter'&&nameGate())$('startTour').focus()});
   nameGate();lbLoad();
