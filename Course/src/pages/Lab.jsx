@@ -9,15 +9,31 @@ const STARTER = {
   js: "function sayHi() {\n  alert('Hi from your code!');\n}",
 };
 
+const BLANK = { html: "", css: "", js: "" };
+const PROJECT_ID = "coding-lab-freeplay";
+
 export default function Lab() {
   const { t } = useLanguage();
-  const saved = getProjects()["coding-lab-freeplay"];
+  // The code the editor opens with: the child's auto-saved project if there
+  // is one, otherwise the starter snippet. Read once, then only replaced by
+  // "New Blank Project" (the editor itself keeps the live edits).
+  const [opening, setOpening] = useState(() => getProjects()[PROJECT_ID] ?? STARTER);
   const [key, setKey] = useState(0);
 
   const startFresh = () => {
-    // clearing is handled by CodePlayground's own Reset button using initial values;
-    // this just forces a full remount back to the starter snippet.
-    setKey((k) => k + 1);
+    if (
+      !window.confirm(
+        t({
+          en: "Start a new blank project? Your current code will be cleared.",
+          zh: "要新建空白项目吗？现在的代码会被清除。",
+        })
+      )
+    ) {
+      return;
+    }
+    saveProject(PROJECT_ID, BLANK);
+    setOpening(BLANK);
+    setKey((k) => k + 1); // remount the editor with the blank code
   };
 
   return (
@@ -35,12 +51,14 @@ export default function Lab() {
       </div>
       <CodePlayground
         key={key}
-        initialHtml={saved?.html ?? STARTER.html}
-        initialCss={saved?.css ?? STARTER.css}
-        initialJs={saved?.js ?? STARTER.js}
+        initialHtml={opening.html}
+        initialCss={opening.css}
+        initialJs={opening.js}
+        resetTo={STARTER}
+        confirmReset
         variant="full"
         height={420}
-        onChange={(state) => saveProject("coding-lab-freeplay", state)}
+        onChange={(state) => saveProject(PROJECT_ID, state)}
       />
     </div>
   );
