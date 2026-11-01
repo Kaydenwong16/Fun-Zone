@@ -1,9 +1,14 @@
-// Global Fighter Jet leaderboard, backed by a Redis REST API (no SDK
-// dependency needed). Vercel's Storage integrations inject credentials
+// Global leaderboards (Fighter Jet by default, Mars Planting Box with
+// ?game=mars), backed by a Redis REST API (no SDK dependency needed). Vercel's Storage integrations inject credentials
 // under different variable names depending on how the database was
 // created, so both known conventions are checked — see README for setup.
 
-const LIST_KEY = 'jetBattleLeaderboard';
+// Each game keeps its own list; requests without ?game= stay on Fighter Jet.
+// onePerPlayer: rank each player's best score once instead of every run.
+const GAMES = {
+  jet: { key: 'jetBattleLeaderboard', onePerPlayer: false },
+  mars: { key: 'marsBoxLeaderboard', onePerPlayer: true }
+};
 const MAX_STORED = 200;
 const TOP_N = 3;
 
@@ -50,6 +55,12 @@ module.exports = async (req, res) => {
     return;
   }
   const { url, token } = creds;
+  const game = GAMES[(req.query && req.query.game) || 'jet'];
+  if (!game) {
+    res.status(400).json({ error: 'Unknown game.' });
+    return;
+  }
+  const LIST_KEY = game.key;
 
   try {
     if (req.method === 'POST') {
@@ -60,7 +71,9 @@ module.exports = async (req, res) => {
         res.status(400).json({ error: 'Name is required.' });
         return;
       }
-      await upstash(url, token, ['LPUSH', LIST_KEY, JSON.stringify({ name, score })]);
+      const entry = { name, score };
+      if (body.diff) entry.diff = String(body.diff).slice(0, 8); // optional difficulty label
+      await upstash(url, token, ['LPUSH', LIST_KEY, JSON.stringify(entry)]);
       await upstash(url, token, ['LTRIM', LIST_KEY, 0, MAX_STORED - 1]);
     } else if (req.method !== 'GET') {
       res.status(405).json({ error: 'Method not allowed.' });
@@ -68,13 +81,21 @@ module.exports = async (req, res) => {
     }
 
     const raw = await upstash(url, token, ['LRANGE', LIST_KEY, 0, -1]);
-    const top = (raw || [])
+    const entries = (raw || [])
       .map(s => {
         try { return JSON.parse(s); } catch (e) { return null; }
       })
-      .filter(e => e && typeof e.name === 'string' && typeof e.score === 'number')
+      .filter(e => e && typeof e.name === 'string' && typeof e.score === 'number');
+    const best = new Map();
+    for (const e of entries) {
+      const k = game.onePerPlayer ? e.name.toLowerCase() : Symbol();
+      const prev = best.get(k);
+      if (!prev || e.score > prev.score) best.set(k, e);
+    }
+    const top = [...best.values()]
       .sort((a, b) => b.score - a.score)
-      .slice(0, TOP_N);
+      .slice(0, TOP_N)
+      .map(({ name, score, diff }) => (diff ? { name, score, diff } : { name, score }));
 
     res.status(200).json({ top });
   } catch (e) {

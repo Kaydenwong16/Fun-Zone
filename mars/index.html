@@ -66,6 +66,14 @@ kbd{font-family:var(--num);font-size:11px;border:1.5px solid var(--line);border-
 .brand .sub{color:var(--muted);font-size:13px;margin-top:4px}
 .burst{flex:none;position:relative;width:170px;height:74px;display:grid;place-items:center}
 .burst svg{position:absolute;inset:0;width:100%;height:100%}
+.lb{flex:none;min-width:210px;padding:6px 12px;border:2px solid var(--ink);border-radius:12px;background:var(--paper);box-shadow:3px 3px 0 var(--shadow)}
+.lb-h{font-family:var(--display);font-size:15px;margin-bottom:2px}
+.lb ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+.lb li{display:flex;align-items:baseline;gap:6px;font-size:13px;line-height:1.35}
+.lb li .lb-name{font-weight:600;max-width:9em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb li .lb-diff{font-size:11px;color:var(--muted)}
+.lb li .lb-score{margin-left:auto;font-family:var(--num);font-variant-numeric:tabular-nums;font-weight:600}
+.lb li.lb-empty{color:var(--muted);font-size:12px}
 .burst span{position:relative;font-family:var(--display);font-size:26px;color:var(--ink);transform:rotate(-4deg)}
 .credit{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px;padding:8px 14px;border:2px solid var(--ink);border-radius:12px;background:var(--paper);box-shadow:3px 3px 0 var(--shadow)}
 .credit .c1{font-size:12px;color:var(--muted);letter-spacing:.08em}
@@ -179,6 +187,10 @@ td.v{font-family:var(--num);font-variant-numeric:tabular-nums;white-space:nowrap
 .diff input{position:absolute;opacity:0;pointer-events:none}
 .diff label:has(input:checked){border-color:var(--ink);background:var(--sun-soft);box-shadow:3px 3px 0 var(--shadow)}
 .diff label:has(input:focus-visible){outline:3px solid var(--focus)}
+.name-need{font-size:13px;font-weight:600;color:var(--rust);margin:-4px 0 0}
+.diff:disabled{opacity:.4}
+.diff:disabled label{cursor:not-allowed}
+.start-actions .btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
 .start-actions{display:flex;flex-wrap:wrap;gap:10px}
 .btn{border:2px solid var(--ink);border-radius:12px;padding:10px 16px;cursor:pointer;background:var(--paper);font-weight:600;box-shadow:3px 3px 0 var(--shadow);transition:transform .08s,box-shadow .08s}
 .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--shadow)}
@@ -362,7 +374,7 @@ footer b{font-family:var(--display);font-weight:400;font-size:15px;color:var(--i
   .game{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);max-height:calc(100vh - 28px);overflow:auto;scrollbar-width:thin;padding:0 7px 7px 0}
 }
 /* 游戏进行中：只留种植箱和控制台，其余收起 */
-body.playing .side,body.playing .burst,body.playing .credit{display:none}
+body.playing .side,body.playing .burst,body.playing .credit,body.playing .lb{display:none}
 .stage-fit{display:contents}
 body.playing .layout{grid-template-columns:1fr}
 body.playing .top{width:100%}
@@ -518,6 +530,10 @@ body.playing .home{margin-left:auto}
   <div class="burst" aria-hidden="true">
     <svg viewBox="0 0 170 74"><path d="M10 37 L22 26 L14 12 L34 18 L42 4 L56 15 L72 3 L82 16 L100 4 L108 17 L128 8 L130 22 L152 18 L146 32 L164 40 L148 47 L158 62 L136 58 L128 71 L112 60 L96 71 L84 59 L66 70 L58 57 L38 66 L36 52 L14 55 L22 44 Z" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.2" stroke-linejoin="round"/></svg>
     <span>开心玩吧！</span>
+  </div>
+  <div class="lb" aria-label="排行榜前三名">
+    <div class="lb-h">🏆 排行榜 · 前三名</div>
+    <ol id="lbList"><li class="lb-empty">加载中…</li></ol>
   </div>
   <div class="credit">
     <span class="c1">原创设计 · 创作者</span>
@@ -792,15 +808,16 @@ body.playing .home{margin-left:auto}
             <label class="field" for="astroName">你的宇航员名字
               <input id="astroName" maxlength="10" placeholder="比如：小海" autocomplete="off">
             </label>
-            <fieldset class="diff">
+            <p class="name-need" id="nameNeed">✏️ 先输入你的宇航员名字，才能选择难度和开始任务</p>
+            <fieldset class="diff" id="diffSet" disabled>
               <legend>选择难度</legend>
               <label><input type="radio" name="diff" id="diff-easy" value="easy"><b>简单</b>目标 30 分<br>东西消耗慢</label>
               <label><input type="radio" name="diff" id="diff-normal" value="normal" checked><b>普通</b>目标 45 分<br>推荐 10 岁</label>
               <label><input type="radio" name="diff" id="diff-hard" value="hard"><b>挑战</b>目标 60 分<br>事件更多</label>
             </fieldset>
             <div class="start-actions">
-              <button class="btn primary" id="startTour" type="button">跟着教程开始（推荐）</button>
-              <button class="btn" id="startDirect" type="button">我会玩，直接开始</button>
+              <button class="btn primary" id="startTour" type="button" disabled>跟着教程开始（推荐）</button>
+              <button class="btn" id="startDirect" type="button" disabled>我会玩，直接开始</button>
             </div>
             <p class="best" id="bestLine">还没有最好成绩，快来创造第一个纪录吧。</p>
           </div>
@@ -1653,8 +1670,33 @@ function renderCards(){
 function bestGet(){try{return JSON.parse(localStorage.getItem('marsbox-best')||'null')}catch(e){return null}}
 function bestSet(v){try{localStorage.setItem('marsbox-best',JSON.stringify(v))}catch(e){}}
 function showBest(){const b=bestGet();$('bestLine').textContent=b?`最好成绩：${b.name} · ${b.diff} · ${b.score} 分 · ${'★'.repeat(b.stars)}${'☆'.repeat(3-b.stars)}`:'还没有最好成绩，快来创造第一个纪录吧。'}
+/* 先填名字，难度和开始按钮才解锁 */
+function nameGate(){
+  const ok=!!($('astroName').value||'').trim();
+  $('diffSet').disabled=!ok;$('startTour').disabled=!ok;$('startDirect').disabled=!ok;$('nameNeed').hidden=ok;
+  return ok;
+}
+/* 排行榜：所有玩家共享的前三名（/api/leaderboard?game=mars） */
+function lbRender(top){
+  const ol=$('lbList');ol.innerHTML='';
+  if(!top||!top.length){const li=document.createElement('li');li.className='lb-empty';li.textContent=top?'还没有成绩，快来当第一名！':'暂时连不上排行榜';ol.appendChild(li);return}
+  top.forEach((e,i)=>{
+    const li=document.createElement('li');
+    const parts=[['lb-medal',['🥇','🥈','🥉'][i]],['lb-name',e.name],['lb-diff',e.diff||''],['lb-score',e.score+' 分']];
+    for(const [c,t] of parts){const sp=document.createElement('span');sp.className=c;sp.textContent=t;li.appendChild(sp)}
+    ol.appendChild(li);
+  });
+}
+function lbLoad(){fetch('/api/leaderboard?game=mars').then(r=>r.ok?r.json():Promise.reject()).then(d=>lbRender(d.top||[])).catch(()=>lbRender(null))}
+function lbSubmit(){
+  if(!S||S.score<=0||S.score<=(S.lbSent||0)) return;
+  S.lbSent=S.score;
+  fetch('/api/leaderboard?game=mars',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:S.name,score:S.score,diff:D().label})})
+    .then(r=>r.ok?r.json():Promise.reject()).then(d=>lbRender(d.top||[])).catch(()=>{});
+}
 function startMission(withTour){
-  const name=($('astroName').value||'').trim()||'小宇航员';
+  if(!nameGate()){$('astroName').focus();return}
+  const name=$('astroName').value.trim();
   const diff=(document.querySelector('input[name="diff"]:checked')||{}).value||'normal';
   S=newState(name,diff,S?S.badges:{});
   plantKeys={};lastHints=new Set();planSol(1);
@@ -1680,6 +1722,7 @@ function endMission(why){
   $('resModal').hidden=false;
   if(why==='goal'){sfx('quizOK')}else sfx(stars>=2?'quizOK':'quizNo');
   const b=bestGet(); if(!b||S.score>b.score) bestSet({name:S.name,diff:d.label,score:S.score,stars});
+  lbSubmit();
 }
 
 /* ================= tutorial ================= */
@@ -1841,7 +1884,10 @@ function wire(){
   $('btnSound').addEventListener('click',()=>{muted=!muted;render()});
   $('btnTour').addEventListener('click',()=>{if(!S.started){startMission(true)}else if(!tour)startTour()});
   $('rulesTour').addEventListener('click',()=>{if(!S.started){startMission(true)}else if(!tour)startTour()});
-  $('btnNew').addEventListener('click',()=>{if(tour)endTour();S.paused=true;S.started=false;$('resModal').hidden=true;$('startScreen').hidden=false;$('astroName').value=S.name==='小宇航员'?'':S.name;showBest();$('stage').scrollIntoView({behavior:'smooth',block:'center'})});
+  $('btnNew').addEventListener('click',()=>{if(tour)endTour();S.paused=true;S.started=false;$('resModal').hidden=true;$('startScreen').hidden=false;$('astroName').value=S.name==='小宇航员'?'':S.name;nameGate();showBest();$('stage').scrollIntoView({behavior:'smooth',block:'center'})});
+  $('astroName').addEventListener('input',nameGate);
+  $('astroName').addEventListener('keydown',e=>{if(e.key==='Enter'&&nameGate())$('startTour').focus()});
+  nameGate();lbLoad();
   $('startTour').addEventListener('click',()=>startMission(true));
   $('startDirect').addEventListener('click',()=>startMission(false));
   $('tourNext').addEventListener('click',()=>{const st=TOUR[tour.i];if(st.last)endTour();else tourGo(tour.i+1)});
