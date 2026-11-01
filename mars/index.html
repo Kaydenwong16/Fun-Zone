@@ -1704,8 +1704,9 @@ function startMission(withTour){
   $('startScreen').hidden=true;renderCards();
   log(`宇航员 ${name} 到达火星！欢迎来到黄奕海设计的火星种植箱。`,'good');
   log('之前的宇航员已经种了几棵菜，快把空位也种满吧。','tip');
-  S.started=true;unlockAudio();
+  S.started=true;
   if(withTour) startTour(); else {S.paused=false;toast('任务开始！Sol 1')}
+  unlockAudio();
 }
 function endMission(why){
   if(S.over&&why!=='goal') return;
@@ -1778,6 +1779,7 @@ function endTour(){
   if(!tour) return; cancelAnimationFrame(tour.raf);tour=null;$('tour').hidden=true;
   if(!S.started){$('startScreen').hidden=false;return}
   S.paused=false;toast('任务开始！Sol '+S.sol);log('新手教程完成，任务正式开始！记住：按钮闪烁就是需要你处理。','good');
+  musicTick(); // 教程结束、正式开始：在这次点击里开音乐（Safari 要求）
   $('stage').scrollIntoView({behavior:'smooth',block:'center'});
 }
 
@@ -1794,44 +1796,56 @@ function sfx(kind){
     o.connect(g).connect(audio.destination);o.start(t);o.stop(t+d+.03);t+=d*.92}
 }
 
-/* background music: 轻柔的太空小曲。任务开始（点「我会玩，直接开始」或教程开始）后才播放；回到开始界面、静音或切到别的标签页时淡出 */
-const MUSIC={bpm:84,chords:[[262,330,392,523],[220,262,330,440],[175,220,262,349],[196,247,294,392]],arp:[0,1,2,3,2,1,2,1],master:null,next:0,step:0,on:false};
-function musicNote(f,t,dur,type,vol){
-  const o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.value=f;
+/* background music: 轻柔的太空小曲。正式开始种植时才播放（点「我会玩，直接开始」，或教程结束后）；教程中不播；回到开始界面、静音或切到别的标签页时暂停。
+   曲子在页面打开时先离线渲染成一段 WAV，再用普通 <audio> 循环播放：Safari / iPhone 对 <audio> 比对实时合成的声音可靠得多。 */
+const MUSIC={bpm:84,chords:[[262,330,392,523],[220,262,330,440],[175,220,262,349],[196,247,294,392]],arp:[0,1,2,3,2,1,2,1],el:null,blocked:false};
+function musicNote(ctx,f,t,dur,type,vol){
+  const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=f;
   g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-  o.connect(g).connect(MUSIC.master);o.start(t);o.stop(t+dur+.05);
+  o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+dur+.05);
+}
+function wavUrl(buf){
+  const d=buf.getChannelData(0),n=d.length,v=new DataView(new ArrayBuffer(44+n*2)),str=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i))};
+  str(0,'RIFF');v.setUint32(4,36+n*2,true);str(8,'WAVE');str(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,buf.sampleRate,true);v.setUint32(28,buf.sampleRate*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);str(36,'data');v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,d[i]))*32767,true);
+  return URL.createObjectURL(new Blob([v],{type:'audio/wav'}));
+}
+function renderMusic(){
+  try{
+    const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext, e=60/MUSIC.bpm/2, steps=32, rate=44100;
+    const ctx=new OAC(1,Math.ceil(steps*e*rate),rate);
+    for(let s=0;s<steps;s++){
+      const ch=MUSIC.chords[Math.floor(s/8)%4], t=s*e;
+      musicNote(ctx,ch[MUSIC.arp[s%8]]*2,t,e*1.6,'triangle',.1);
+      if(s%8===0) musicNote(ctx,ch[0],t,e*8,'triangle',.07);
+      if(s%16===12) musicNote(ctx,ch[3]*4,t,e*3,'sine',.04);
+    }
+    const done=buf=>{if(MUSIC.el)return;const el=new Audio(wavUrl(buf));el.loop=true;el.volume=.8;el.preload='auto';MUSIC.el=el;musicTick()};
+    ctx.oncomplete=ev=>done(ev.renderedBuffer);
+    const pr=ctx.startRendering(); if(pr&&pr.then) pr.then(done);
+  }catch(err){}
 }
 function musicTick(){
-  const want=!muted&&!!S&&S.started&&!document.hidden;
-  if(!audio) return;
-  const now=audio.currentTime;
-  if(!MUSIC.master){MUSIC.master=audio.createGain();MUSIC.master.gain.value=0;MUSIC.master.connect(audio.destination)}
-  if(want!==MUSIC.on){MUSIC.on=want;MUSIC.master.gain.cancelScheduledValues(now);MUSIC.master.gain.setTargetAtTime(want?.8:0,now,.35)}
-  if(want&&audio.state==='suspended') audio.resume().catch(()=>{});
-  if(!want) return;
-  if(MUSIC.next<now) MUSIC.next=now+.05;
-  const e=60/MUSIC.bpm/2;
-  while(MUSIC.next<now+.4){
-    const s=MUSIC.step, ch=MUSIC.chords[Math.floor(s/8)%4], t=MUSIC.next;
-    musicNote(ch[MUSIC.arp[s%8]]*2,t,e*1.6,'triangle',.1);
-    if(s%8===0) musicNote(ch[0],t,e*8,'triangle',.07);
-    if(s%16===12) musicNote(ch[3]*4,t,e*3,'sine',.04);
-    MUSIC.step++;MUSIC.next+=e;
-  }
+  const el=MUSIC.el; if(!el) return;
+  const want=!muted&&!!S&&S.started&&!tour&&!document.hidden;
+  if(want&&el.paused&&!MUSIC.blocked) el.play().catch(()=>{MUSIC.blocked=true});
+  else if(!want&&!el.paused) el.pause();
 }
 function unlockAudio(){
   try{
     if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();
     if(audio.state!=='running'){
       audio.resume().catch(()=>{});
-      // Safari 需要在点击时真的播一个声音（这里是一段静音）才会解锁
+      // Safari 需要在点击时真的播一个声音（这里是一段静音）才会解锁音效
       const b=audio.createBuffer(1,1,22050),src=audio.createBufferSource();src.buffer=b;src.connect(audio.destination);src.start(0);
     }
   }catch(e){}
-  musicTick();
+  MUSIC.blocked=false;musicTick();
 }
 /* Safari 只在 click/touchend/keydown 时允许开声音，所以几个事件都监听 */
 for(const ev of ['pointerdown','click','touchend','keydown']) addEventListener(ev,unlockAudio,{capture:true});
+renderMusic();
 setInterval(musicTick,100);
 
 /* ================= build scene ================= */
