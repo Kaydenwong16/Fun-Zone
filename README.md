@@ -17,6 +17,16 @@ history, same code), which still exists but is no longer the one being deployed 
 
 Open `Website/index.html` for the landing page, or `game/index.html` to jump straight into the game.
 
+### Run the whole site on a Mac
+
+Double-click **`Start Fun Zone.command`**. It starts a local server (`tools/local-server.cjs`,
+needs Node.js) and opens http://localhost:8800/ in the browser; close its Terminal window to
+stop it. Pages link together exactly like the live site, and the `api/` handlers run against an
+in-memory test database, so AI Builder logins/saving and the leaderboards work without touching
+live data (test data is gone once the server stops; the teacher-view passcode is `teacher`).
+Opening the HTML files directly, or through VS Code's Live Preview, breaks the `/…` links and
+can't run the API. `.vercelignore` keeps both files off the live site.
+
 ## Controls
 
 - **Arrow Keys / WASD** — move
