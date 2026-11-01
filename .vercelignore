@@ -1,0 +1,3 @@
+# Local-only helpers for running the site on a Mac — not part of the live site.
+Start Fun Zone.command
+tools/
