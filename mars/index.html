@@ -180,10 +180,10 @@ td.v{font-family:var(--num);font-variant-numeric:tabular-nums;white-space:nowrap
 .start-card p{font-size:14px;color:var(--muted)}
 .field{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600}
 .field input{border:2px solid var(--ink);border-radius:10px;padding:8px 10px;font:inherit;font-weight:400;background:var(--paper-2);color:var(--ink)}
-/* 名字还没填：整个输入名字区块黄色闪烁，填了就停 */
+/* 名字还没填：整个输入名字区块浅绿色闪烁，填了就停 */
 .field:has(#astroName:placeholder-shown){padding:8px 10px;margin:-8px -10px;border-radius:12px;color:#2A2216;animation:nameBlink 1.2s ease-in-out infinite}
 .field:has(#astroName:placeholder-shown) input{border-color:#2A2216}
-@keyframes nameBlink{0%,100%{background:#FFD43B;box-shadow:0 0 14px 3px rgba(255,212,59,.65)}50%{background:#FFF3B0;box-shadow:none}}
+@keyframes nameBlink{0%,100%{background:#8EE4A6;box-shadow:0 0 14px 3px rgba(142,228,166,.65)}50%{background:#DDF7E4;box-shadow:none}}
 .diff{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border:0;padding:0;margin:0}
 .diff legend{font-size:13px;font-weight:600;margin-bottom:4px;padding:0}
 .diff label{border:2px solid var(--line);border-radius:12px;padding:8px;cursor:pointer;display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--muted);background:var(--paper)}
