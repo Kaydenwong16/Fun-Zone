@@ -1,4 +1,4 @@
-import{i as e,l as t,n,r,t as i,u as a}from"./missions-KR4pOZzn.js";function o(e){return e?`<span class="en">${e.en}</span><span class="zh">${e.zh}</span>`:``}function s(e){if(e===12)return{start:78,end:90};let t=(e-1)*7+1;return{start:t,end:t+6}}function c(e){let t=a.find(t=>t.number===e),i=r[e]||[],c=n(e),{start:l,end:u}=s(e);return`
+import{i as e,l as t,n,r,t as i,u as a}from"./missions-C62zVGZc.js";function o(e){return e?`<span class="en">${e.en}</span><span class="zh">${e.zh}</span>`:``}function s(e){if(e===12)return{start:78,end:90};let t=(e-1)*7+1;return{start:t,end:t+6}}function c(e){let t=a.find(t=>t.number===e),i=r[e]||[],c=n(e),{start:l,end:u}=s(e);return`
     <div class="outline-week card card-pad">
       <div class="outline-week-head">
         <span class="pill pill-blue">${o({en:`Week ${e} · Days ${l}–${u}`,zh:`第${e}周 · 第${l}–${u}天`})}</span>
@@ -37,9 +37,14 @@ import{i as e,l as t,n,r,t as i,u as a}from"./missions-KR4pOZzn.js";function o(e
             <span class="brand-mark">🤖</span>
             <span class="brand-text"><span class="en">AI Builder Kids</span><span class="zh">儿童AI课程</span><span class="credit">（Claude）</span></span>
           </a>
-          <button type="button" class="btn btn-secondary btn-sm no-print" onclick="window.print()">
-            🖨️ <span class="en">Print</span><span class="zh">打印</span>
-          </button>
+          <div class="outline-header-actions">
+            <button type="button" class="btn btn-secondary btn-sm no-print" onclick="window.print()">
+              🖨️ <span class="en">Print</span><span class="zh">打印</span>
+            </button>
+            <a href="/" class="btn btn-sm funzone-link no-print">
+              🏠 <span class="en">Return to Fun Zone</span><span class="zh">返回Fun Zone主页</span>
+            </a>
+          </div>
         </div>
       </header>
 

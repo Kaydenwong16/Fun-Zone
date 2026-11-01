@@ -641,6 +641,74 @@ code {
   display: flex;
   align-items: center;
   gap: 8px;
+  /* Stay in the right corner even when the nav collapses into ☰. */
+  margin-left: auto;
+}
+
+/* "Return to Fun Zone": the way back to the Fun Zone site home ("/"). */
+.funzone-link {
+  background: #f28c28;
+  color: #fff;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(242, 140, 40, 0.35);
+}
+.funzone-link:hover {
+  background: #e07a14;
+  color: #fff;
+}
+.funzone-link .main-nav-label {
+  display: inline-flex;
+  gap: 4px;
+}
+.funzone-link.is-floating {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  z-index: 50;
+}
+/* Full "Return to Fun Zone" label only where the header has room for it
+   next to the full nav; otherwise the shorter "Fun Zone" keeps the nav from
+   collapsing into ☰ on ordinary laptop widths. */
+.funzone-link .fz-short {
+  display: none;
+}
+@media (max-width: 1499px) {
+  .app-header .funzone-link .fz-full {
+    display: none;
+  }
+  .app-header .funzone-link .fz-short {
+    display: inline;
+  }
+}
+/* Narrower laptops: just the 🏠 while the full nav still fits beside it;
+   once the nav has collapsed into ☰ anyway there's room for "Fun Zone". */
+@media (min-width: 601px) and (max-width: 1365px) {
+  .app-header .main-nav:not(.is-compact) ~ .header-right .funzone-link .fz-short {
+    display: none;
+  }
+  .app-header .main-nav:not(.is-compact) ~ .header-right .funzone-link {
+    padding: 6px 10px;
+  }
+}
+/* Phones: the header has no room for the label, so it shrinks to the 🏠
+   icon (its aria-label/title still say "Return to Fun Zone"). */
+@media (max-width: 600px) {
+  .app-header .funzone-link .main-nav-label {
+    display: none;
+  }
+  .app-header .funzone-link {
+    padding: 6px 10px;
+  }
+  .header-stat-level {
+    display: none;
+  }
+}
+.outline-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .header-stat {

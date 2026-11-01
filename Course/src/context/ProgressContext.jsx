@@ -15,6 +15,7 @@ import { BADGES } from "../data/badges.js";
 const ProgressContext = createContext(null);
 const SYNC_DEBOUNCE_MS = 1500;
 const AUTO_SAVE_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
+const SAVE_NOW_TIMEOUT_MS = 2000;
 
 export function ProgressProvider({ children }) {
   const [progress, setProgress] = useState(() => touchStreak(getProgress()));
@@ -78,6 +79,22 @@ export function ProgressProvider({ children }) {
     };
     window.addEventListener("pagehide", handlePageHide);
     return () => window.removeEventListener("pagehide", handlePageHide);
+  }, []);
+
+  // Save right now instead of waiting for the debounce — used before leaving
+  // the app (e.g. "Return to Fun Zone"), so the latest progress reaches the
+  // student's cloud account too. Waits at most SAVE_NOW_TIMEOUT_MS for the
+  // network so a slow or offline connection can't trap them on the page;
+  // the local copy is always written first.
+  const saveNow = useCallback(async () => {
+    window.clearTimeout(syncTimer.current);
+    saveProgress(progressRef.current);
+    const session = getSession();
+    if (!session) return;
+    await Promise.race([
+      syncAccount({ name: session.name, password: session.password, progress: progressRef.current }).catch(() => {}),
+      new Promise((resolve) => window.setTimeout(resolve, SAVE_NOW_TIMEOUT_MS)),
+    ]);
   }, []);
 
   const showXP = useCallback((amount) => {
@@ -192,6 +209,7 @@ export function ProgressProvider({ children }) {
       reset,
       loadProgress,
       dismissBadge,
+      saveNow,
     }),
     [
       progress,
@@ -208,6 +226,7 @@ export function ProgressProvider({ children }) {
       reset,
       loadProgress,
       dismissBadge,
+      saveNow,
     ]
   );
 
