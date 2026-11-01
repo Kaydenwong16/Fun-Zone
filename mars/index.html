@@ -187,10 +187,13 @@ td.v{font-family:var(--num);font-variant-numeric:tabular-nums;white-space:nowrap
 .diff input{position:absolute;opacity:0;pointer-events:none}
 .diff label:has(input:checked){border-color:var(--ink);background:var(--sun-soft);box-shadow:3px 3px 0 var(--shadow)}
 .diff label:has(input:focus-visible){outline:3px solid var(--focus)}
-.name-need{font-size:13px;font-weight:600;color:var(--rust);margin:-4px 0 0}
-.diff:disabled{opacity:.4}
-.diff:disabled label{cursor:not-allowed}
-.start-actions .btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+/* 没填名字时：提示和锁住的难度/开始按钮一起黄色闪烁 */
+.start-card .name-need{font-size:13px;font-weight:600;color:#2A2216;margin:-4px 0 0;padding:6px 12px;border:2px solid #FFD43B;border-radius:10px;animation:lockHint 1.2s ease-in-out infinite}
+@keyframes lockHint{0%,100%{background:#FFD43B;box-shadow:0 0 12px 2px rgba(255,212,59,.6)}50%{background:#FFF3B0;box-shadow:none}}
+.diff:disabled{opacity:.7}
+.diff:disabled label,.start-actions .btn:disabled{cursor:not-allowed;animation:lockGlow 1.2s ease-in-out infinite}
+.start-actions .btn:disabled{opacity:.7;box-shadow:none}
+@keyframes lockGlow{0%,100%{border-color:#FFD43B;box-shadow:0 0 10px 1px rgba(255,212,59,.55)}50%{border-color:var(--line);box-shadow:none}}
 .start-actions{display:flex;flex-wrap:wrap;gap:10px}
 .btn{border:2px solid var(--ink);border-radius:12px;padding:10px 16px;cursor:pointer;background:var(--paper);font-weight:600;box-shadow:3px 3px 0 var(--shadow);transition:transform .08s,box-shadow .08s}
 .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--shadow)}
