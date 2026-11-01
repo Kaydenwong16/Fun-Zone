@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { useLanguage, UI_STRINGS } from "../context/LanguageContext.jsx";
 import { useProgress } from "../context/ProgressContext.jsx";
 import { levelProgressPct } from "../utils/progress.js";
+import FunZoneLink from "./FunZoneLink.jsx";
 
 const NAV_ITEMS = [
   { key: "home", icon: "🏠", label: "navHome" },
@@ -76,6 +77,8 @@ export default function Header({ route, onNavigate, onOpenSettings }) {
     };
 
     measure();
+    // Web fonts change every label's width once they finish loading.
+    document.fonts?.ready.then(measure);
     const ro = new ResizeObserver(measure);
     ro.observe(innerRef.current);
     window.addEventListener("resize", measure);
@@ -134,7 +137,7 @@ export default function Header({ route, onNavigate, onOpenSettings }) {
           <div className="header-stat" title="XP">
             ⭐ <strong>{progress.xp}</strong>
           </div>
-          <div className="header-stat" title="Level">
+          <div className="header-stat header-stat-level" title="Level">
             🧬 L{level}
           </div>
           <div className="header-stat header-stat-streak" title="Streak">
@@ -157,6 +160,7 @@ export default function Header({ route, onNavigate, onOpenSettings }) {
               ☰
             </button>
           )}
+          <FunZoneLink />
         </div>
       </div>
       <div className="header-progress">

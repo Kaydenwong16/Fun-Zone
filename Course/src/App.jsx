@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Learn from "./pages/Learn.jsx";
 import Missions from "./pages/Missions.jsx";
 import Lab from "./pages/Lab.jsx";
+import FunZoneLink from "./components/FunZoneLink.jsx";
 import Roadmap from "./pages/Roadmap.jsx";
 import Badges from "./pages/Badges.jsx";
 import AITeacher from "./pages/AITeacher.jsx";
@@ -28,9 +29,19 @@ function Shell() {
 
   if (!profile.onboarded) {
     if (isDeviceKnown() && !showAsNewStudent) {
-      return <Login onFinish={() => setRoute("home")} onNewStudent={() => setShowAsNewStudent(true)} />;
+      return (
+        <>
+          <FunZoneLink floating />
+          <Login onFinish={() => setRoute("home")} onNewStudent={() => setShowAsNewStudent(true)} />
+        </>
+      );
     }
-    return <Onboarding onFinish={() => setRoute("home")} />;
+    return (
+      <>
+        <FunZoneLink floating />
+        <Onboarding onFinish={() => setRoute("home")} />
+      </>
+    );
   }
 
   const openLesson = (id) => {
