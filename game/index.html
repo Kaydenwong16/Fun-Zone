@@ -50,6 +50,20 @@
     z-index: 25;
   }
   #homeBtn:hover, #homeBtn:active { background: rgba(0,229,255,0.32); }
+  /* Narrow phones: the longer label wraps onto two compact lines so it
+     stays in the corner instead of running into the Sound button. */
+  @media (max-width: 600px) {
+    #homeBtn {
+      max-width: 92px;
+      padding: 5px 10px;
+      border-radius: 14px;
+      font-size: 11px;
+      line-height: 1.2;
+      text-align: center;
+      white-space: normal;
+    }
+    #playerTag { top: max(64px, calc(env(safe-area-inset-top) + 54px)); }
+  }
   #playerTag {
     position: absolute;
     top: max(56px, calc(env(safe-area-inset-top) + 46px));
@@ -205,7 +219,7 @@
 
 <canvas id="gameCanvas"></canvas>
 
-<a id="homeBtn" href="/" title="Back to home">🏠 Home</a>
+<a id="homeBtn" href="/" title="Return to Fun Zone">🏠 Return to Fun Zone</a>
 
 <div id="playerTag">
   <div class="name" id="playerNameTag">Player</div>
