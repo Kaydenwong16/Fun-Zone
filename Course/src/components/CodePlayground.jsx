@@ -37,6 +37,12 @@ export default function CodePlayground({
   height = 220,
   onChange,
   showAIHelp = true,
+  // What Reset goes back to. Defaults to the initial code, which is right
+  // for lesson demos; the Coding Lab passes its starter snippet instead,
+  // because its initial code is the child's own auto-saved work.
+  resetTo,
+  // Ask before Reset throws away the child's edits (used where they're saved).
+  confirmReset = false,
 }) {
   const { t } = useLanguage();
   const [html, setHtml] = useState(initialHtml);
@@ -72,9 +78,21 @@ export default function CodePlayground({
   };
 
   const reset = () => {
-    setHtml(initialHtml);
-    setCss(initialCss);
-    setJs(initialJs);
+    if (
+      confirmReset &&
+      !window.confirm(
+        t({
+          en: "Go back to the starter code? Your changes will be lost.",
+          zh: "要恢复成初始代码吗？你的修改会被清除。",
+        })
+      )
+    ) {
+      return;
+    }
+    const target = resetTo ?? { html: initialHtml, css: initialCss, js: initialJs };
+    setHtml(target.html);
+    setCss(target.css);
+    setJs(target.js);
     setRuntimeError(null);
     setRunKey((k) => k + 1);
   };
