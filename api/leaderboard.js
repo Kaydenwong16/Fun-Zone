@@ -6,7 +6,9 @@
 // Each game keeps its own list; requests without ?game= stay on Fighter Jet.
 // onePerPlayer: rank each player's best score once instead of every run.
 const GAMES = {
-  jet: { key: 'jetBattleLeaderboard', onePerPlayer: false },
+  // Fighter Jet's Top Pilots were reset on 2026-11-01 by moving to a fresh list;
+  // the old scores are still in 'jetBattleLeaderboard' if they're ever wanted back.
+  jet: { key: 'jetBattleLeaderboard-2026-11', onePerPlayer: false },
   mars: { key: 'marsBoxLeaderboard', onePerPlayer: true }
 };
 const MAX_STORED = 200;
