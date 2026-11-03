@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { LanguageProvider, useLanguage } from "./context/LanguageContext.jsx";
 import { ProgressProvider } from "./context/ProgressContext.jsx";
 import Header from "./components/Header.jsx";
@@ -82,6 +83,7 @@ export default function App() {
     <LanguageProvider>
       <ProgressProvider>
         <Shell />
+        <Analytics />
       </ProgressProvider>
     </LanguageProvider>
   );
